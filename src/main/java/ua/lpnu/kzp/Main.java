@@ -1,3 +1,4 @@
+
 package ua.lpnu.kzp;
 
 import java.io.IOException;
@@ -8,8 +9,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Консольний застосунок для обробки CSV-записів кінотеатру.
+ *
+ * <p>Програма зчитує вхідний файл, перевіряє коректність записів,
+ * обчислює статистичні показники та формує текстовий звіт
+ * у кодуванні UTF-8.</p>
+ */
 public class Main {
 
+    /**
+     * Забороняє створення екземплярів службового класу.
+     */
+    private Main() {
+    }
+
+    /**
+     * Точка входу до застосунку.
+     *
+     * <p>Обробляє аргументи командного рядка, зчитує CSV-файл,
+     * перевіряє записи, обчислює статистику та записує звіт.</p>
+     *
+     * @param args аргументи командного рядка:
+     *             --help, --version, --input та --output
+     */
     public static void main(String[] args) {
         Path inputPath = Path.of("data", "input.csv");
         Path outputPath = Path.of("out", "report.txt");
@@ -162,6 +185,10 @@ public class Main {
         }
     }
 
+    /**
+     * Виводить довідку щодо запуску програми, доступних параметрів
+     * командного рядка та стандартних шляхів до файлів.
+     */
     private static void printHelp() {
         System.out.println("Використання: java -jar lab01-1.0.0.jar [параметри]");
         System.out.println();
