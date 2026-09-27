@@ -1,0 +1,22 @@
+# Maven
+target/
+
+# Compiled Java files
+*.class
+
+# IDE settings
+.vscode/
+.idea/
+*.iml
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Generated output
+out/*
+!out/.gitkeep
+
+# Temporary files
+*.log
+*.tmp
