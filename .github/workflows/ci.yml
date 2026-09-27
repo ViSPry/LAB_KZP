@@ -6,7 +6,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout repository
@@ -19,14 +24,24 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build and test
+      - name: Build and test (Linux/macOS)
+        if: runner.os != 'Windows'
         run: ./mvnw clean verify
 
-      - name: Run SpotBugs
+      - name: Build and test (Windows)
+        if: runner.os == 'Windows'
+        run: .\mvnw.cmd clean verify
+
+      - name: Run SpotBugs (Linux/macOS)
+        if: runner.os != 'Windows'
         run: ./mvnw spotbugs:check
+
+      - name: Run SpotBugs (Windows)
+        if: runner.os == 'Windows'
+        run: .\mvnw.cmd spotbugs:check
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
-          name: cinema-jar
+          name: cinema-jar-${{ matrix.os }}
           path: target/*.jar
