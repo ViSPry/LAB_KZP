@@ -1,3 +1,4 @@
+
 package ua.lpnu.kzp;
 
 import org.junit.jupiter.api.Test;
@@ -9,8 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MainTest {
@@ -131,5 +132,78 @@ class MainTest {
         assertTrue(report.contains("Загальний виторг: 0.00 грн"));
         assertTrue(report.contains("Середня ціна квитка: 0.00 грн"));
         assertTrue(report.contains("Максимальна кількість проданих квитків: 0"));
+    }
+
+    @Test
+    void missingInputFileDoesNotCreateReport() {
+        Path input = tempDir.resolve("missing.csv");
+        Path output = tempDir.resolve("missing-report.txt");
+
+        PrintStream originalErr = System.err;
+        ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
+
+        try {
+            System.setErr(new PrintStream(errorOutput, true, StandardCharsets.UTF_8));
+
+            Main.main(new String[]{
+                    "--input", input.toString(),
+                    "--output", output.toString()
+            });
+
+            String errorMessage = errorOutput.toString(StandardCharsets.UTF_8);
+
+            assertTrue(errorMessage.contains("Помилка роботи з файлом:"));
+            assertFalse(Files.exists(output));
+        } finally {
+            System.setErr(originalErr);
+        }
+    }
+
+    @Test
+    void inputArgumentRejectsAnotherOptionAsPath() {
+        Path output = tempDir.resolve("unexpected-report.txt");
+
+        PrintStream originalErr = System.err;
+        ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
+
+        try {
+            System.setErr(new PrintStream(errorOutput, true, StandardCharsets.UTF_8));
+
+            Main.main(new String[]{
+                    "--output", output.toString(),
+                    "--input", "--version"
+            });
+
+            String errorMessage = errorOutput.toString(StandardCharsets.UTF_8);
+
+            assertTrue(errorMessage.contains("після --input потрібно вказати шлях"));
+            assertFalse(Files.exists(output));
+        } finally {
+            System.setErr(originalErr);
+        }
+    }
+
+    @Test
+    void outputArgumentRejectsAnotherOptionAsPath() {
+        Path output = tempDir.resolve("unexpected-report.txt");
+
+        PrintStream originalErr = System.err;
+        ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
+
+        try {
+            System.setErr(new PrintStream(errorOutput, true, StandardCharsets.UTF_8));
+
+            Main.main(new String[]{
+                    "--output", "--input",
+                    "--input", "data/input.csv"
+            });
+
+            String errorMessage = errorOutput.toString(StandardCharsets.UTF_8);
+
+            assertTrue(errorMessage.contains("після --output потрібно вказати шлях"));
+            assertFalse(Files.exists(output));
+        } finally {
+            System.setErr(originalErr);
+        }
     }
 }

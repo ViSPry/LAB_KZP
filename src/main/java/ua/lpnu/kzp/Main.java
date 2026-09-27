@@ -25,7 +25,7 @@ public class Main {
                     return;
 
                 case "--input":
-                    if (i + 1 >= args.length) {
+                    if (i + 1 >= args.length || args[i + 1].startsWith("--")) {
                         System.err.println("Помилка: після --input потрібно вказати шлях.");
                         return;
                     }
@@ -33,7 +33,7 @@ public class Main {
                     break;
 
                 case "--output":
-                    if (i + 1 >= args.length) {
+                    if (i + 1 >= args.length || args[i + 1].startsWith("--")) {
                         System.err.println("Помилка: після --output потрібно вказати шлях.");
                         return;
                     }
