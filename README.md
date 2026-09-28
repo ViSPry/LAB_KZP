@@ -1,133 +1,72 @@
-
-# Cinema CSV Processing Application
-
-Laboratory Work No. 1 — Variant 19: Cinema.
-
-A Java console application for processing cinema records from a CSV file, validating input data, calculating statistics, and generating a UTF-8 report.
-
-## Technologies
-
+Консольний застосунок для обробки CSV-даних кінотеатру
+Лабораторна робота № 1 — варіант 19 «Кінотеатр».
+Консольний застосунок мовою Java для зчитування записів про кіносеанси з CSV-файлу, перевірки вхідних даних, обчислення статистичних показників і формування текстового звіту в кодуванні UTF-8.
+Використані технології
 - Java 21
 - Maven 3.9+
 - JUnit 5
 - SpotBugs
-- Git and GitHub
+- Git і GitHub
 - GitHub Actions
-
-## CSV Format
-
-The application uses a semicolon-separated CSV file with five fields:
-
-`film;hall;ticketPrice;sold;durationMin`
-
-Example:
-
-```text
+Формат CSV-файлу
+Застосунок обробляє записи з п’ятьма полями, розділеними крапкою з комою:
+film;hall;ticketPrice;sold;durationMin
+Приклад:
 Дюна 2;1;180.00;120;166
 Оппенгеймер;2;200.00;95;180
 Інтерстеллар;3;160.00;150;169
-```
-
-## Validation
-
-The application checks that:
-
-- Each record contains exactly five fields.
-- The film title is not empty.
-- The hall number is positive.
-- The ticket price is finite and non-negative.
-- The number of sold tickets is non-negative.
-- The film duration is positive.
-- Numeric fields have a valid format.
-
-Invalid records are counted but excluded from statistical calculations.
-
-## Calculated Statistics
-
-- Number of valid records.
-- Number of invalid records.
-- Total revenue.
-- Average ticket price.
-- Maximum number of sold tickets.
-
-## Build
-
-On Windows:
-
-```cmd
-mvnw.cmd clean package
-```
-
-On Linux and macOS:
-
-```bash
+Перевірка вхідних даних
+Програма перевіряє, чи:
+- запис містить рівно п’ять полів;
+- назва фільму не порожня;
+- номер кінозалу додатний;
+- ціна квитка є скінченним невід’ємним числом;
+- кількість проданих квитків невід’ємна;
+- тривалість фільму додатна;
+- числові поля мають правильний формат.
+Некоректні записи враховуються окремо та не включаються до статистичних розрахунків.
+Обчислювані показники
+- Кількість правильних записів.
+- Кількість неправильних записів.
+- Загальний виторг.
+- Середня ціна квитка.
+- Максимальна кількість проданих квитків.
+Збирання проєкту
+У Windows (PowerShell):
+.\mvnw.cmd clean package
+У Linux і macOS:
 ./mvnw clean package
-```
-
-## Run
-
-Default execution:
-
-```bash
+Запуск програми
+Звичайний запуск:
 java -jar target/lab01-1.0.0.jar
-```
-
-Display help:
-
-```bash
+Виведення довідки:
 java -jar target/lab01-1.0.0.jar --help
-```
-
-Display version:
-
-```bash
+Виведення версії:
 java -jar target/lab01-1.0.0.jar --version
-```
-
-Use custom input and output files:
-
-```bash
+Вибір власних шляхів до вхідного та вихідного файлів:
 java -jar target/lab01-1.0.0.jar --input data/input.csv --output out/custom-report.txt
-```
-
-## Input and Output
-
-Default input: `data/input.csv`
-
-Default output: `out/report.txt`
-
-Both files use UTF-8 encoding.
-
-## Testing
-
-Run JUnit tests:
-
-```cmd
-mvnw.cmd clean test
-```
-
-The project includes 8 automated tests.
-
-## Static Analysis
-
-Run SpotBugs:
-
-```cmd
-mvnw.cmd clean compile spotbugs:check
-```
-
-## Continuous Integration
-
-GitHub Actions automatically builds and tests the project on:
-
-- Ubuntu
-- Windows
-- macOS
-
-Each successful build uploads an executable JAR as a workflow artifact.
-
-## Version
-
-Current version: `1.0.0`
-
-Git tag: `v1.0.0`
+Вхідні та вихідні файли
+Стандартний вхідний файл: data/input.csv.
+Стандартний вихідний файл: out/report.txt.
+Для читання й запису текстових файлів використовується кодування UTF-8.
+Тестування
+Запуск тестів JUnit у Windows (PowerShell):
+.\mvnw.cmd clean test
+У проєкті реалізовано 8 автоматизованих тестів.
+Статичний аналіз
+SpotBugs прив’язано до фази Maven verify. Для повної перевірки у Windows (PowerShell) виконайте:
+.\mvnw.cmd clean verify
+Команда компілює програму, запускає тести JUnit, створює JAR-файл і автоматично виконує spotbugs:check. Під час локальної перевірки успішно пройдено 8 тестів, SpotBugs не виявив дефектів, результат збирання — BUILD SUCCESS.
+У Linux і macOS використовуйте команду ./mvnw clean verify.
+Безперервна інтеграція
+GitHub Actions автоматично збирає та перевіряє проєкт на трьох операційних системах:
+- Ubuntu;
+- Windows;
+- macOS.
+Після успішного виконання workflow JAR-файл публікується як артефакт збірки.
+Історія запусків: https://github.com/ViSPry/LAB_KZP/actions
+Версія проєкту
+Поточна версія застосунку: 1.0.0.
+Git-тег: v1.0.0.
+Сторінка релізу: https://github.com/ViSPry/LAB_KZP/releases/tag/v1.0.0
+Після внесення виправлень за результатами рев’ю та успішної перевірки CI наявний тег потрібно оновити, щоб він указував на остаточний перевірений коміт. Створювати нову патч-версію для цих виправлень не потрібно.

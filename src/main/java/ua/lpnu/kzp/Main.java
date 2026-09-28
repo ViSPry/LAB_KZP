@@ -64,7 +64,9 @@ public class Main {
                     break;
 
                 default:
-                    System.err.println("Невідомий параметр: " + args[i]);
+                    System.err.println(
+                            "Невідомий параметр: %s".formatted(args[i])
+                    );
                     System.err.println("Використайте --help для перегляду довідки.");
                     return;
             }
@@ -125,18 +127,22 @@ public class Main {
                     totalTicketPrice += ticketPrice;
                     maxSold = Math.max(maxSold, sold);
 
-                    System.out.println("Рядок " + lineNumber + ": OK — " + film);
+                    System.out.println(
+                            "Рядок %d: OK — %s".formatted(lineNumber, film)
+                    );
 
                 } catch (NumberFormatException e) {
                     invalidCount++;
                     System.out.println(
-                            "Рядок " + lineNumber + ": ПОМИЛКА — неправильний числовий формат"
+                            "Рядок %d: ПОМИЛКА — неправильний числовий формат"
+                                    .formatted(lineNumber)
                     );
 
                 } catch (IllegalArgumentException e) {
                     invalidCount++;
                     System.out.println(
-                            "Рядок " + lineNumber + ": ПОМИЛКА — " + e.getMessage()
+                            "Рядок %d: ПОМИЛКА — %s"
+                                    .formatted(lineNumber, e.getMessage())
                     );
                 }
             }
@@ -146,8 +152,8 @@ public class Main {
                     : 0;
 
             report.add("===== ЗВІТ КІНОТЕАТРУ =====");
-            report.add("Правильних записів: " + validCount);
-            report.add("Неправильних записів: " + invalidCount);
+            report.add("Правильних записів: %d".formatted(validCount));
+            report.add("Неправильних записів: %d".formatted(invalidCount));
 
             report.add(String.format(
                     Locale.ROOT,
@@ -161,7 +167,9 @@ public class Main {
                     averageTicketPrice
             ));
 
-            report.add("Максимальна кількість проданих квитків: " + maxSold);
+            report.add(
+                    "Максимальна кількість проданих квитків: %d".formatted(maxSold)
+            );
 
             System.out.println();
 
@@ -178,10 +186,14 @@ public class Main {
             Files.write(outputPath, report, StandardCharsets.UTF_8);
 
             System.out.println();
-            System.out.println("Звіт збережено: " + outputPath.toAbsolutePath());
+            System.out.println(
+                    "Звіт збережено: %s".formatted(outputPath.toAbsolutePath())
+            );
 
         } catch (IOException e) {
-            System.err.println("Помилка роботи з файлом: " + e.getMessage());
+            System.err.println(
+                    "Помилка роботи з файлом: %s".formatted(e.getMessage())
+            );
         }
     }
 
