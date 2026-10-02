@@ -1,4 +1,3 @@
-
 package ua.lpnu.kzp;
 
 import java.io.IOException;
@@ -12,7 +11,7 @@ import java.util.Locale;
 /**
  * Консольний застосунок для обробки CSV-записів кінотеатру.
  *
- * <p>Програма зчитує вхідний файл, перевіряє коректність записів,
+ * <p>Програма зчитує вхідний файл, створює об'єкти {@link Screening},
  * обчислює статистичні показники та формує текстовий звіт
  * у кодуванні UTF-8.</p>
  */
@@ -26,9 +25,6 @@ public class Main {
 
     /**
      * Точка входу до застосунку.
-     *
-     * <p>Обробляє аргументи командного рядка, зчитує CSV-файл,
-     * перевіряє записи, обчислює статистику та записує звіт.</p>
      *
      * @param args аргументи командного рядка:
      *             --help, --version, --input та --output
@@ -49,7 +45,9 @@ public class Main {
 
                 case "--input":
                     if (i + 1 >= args.length || args[i + 1].startsWith("--")) {
-                        System.err.println("Помилка: після --input потрібно вказати шлях.");
+                        System.err.println(
+                                "Помилка: після --input потрібно вказати шлях."
+                        );
                         return;
                     }
                     inputPath = Path.of(args[++i]);
@@ -57,7 +55,9 @@ public class Main {
 
                 case "--output":
                     if (i + 1 >= args.length || args[i + 1].startsWith("--")) {
-                        System.err.println("Помилка: після --output потрібно вказати шлях.");
+                        System.err.println(
+                                "Помилка: після --output потрібно вказати шлях."
+                        );
                         return;
                     }
                     outputPath = Path.of(args[++i]);
@@ -67,79 +67,40 @@ public class Main {
                     System.err.println(
                             "Невідомий параметр: %s".formatted(args[i])
                     );
-                    System.err.println("Використайте --help для перегляду довідки.");
+                    System.err.println(
+                            "Використайте --help для перегляду довідки."
+                    );
                     return;
             }
         }
 
         List<String> report = new ArrayList<>();
+        List<Screening> screenings = new ArrayList<>();
 
-        int validCount = 0;
         int invalidCount = 0;
-        double totalRevenue = 0;
-        double totalTicketPrice = 0;
-        int maxSold = 0;
 
         try {
-            List<String> lines = Files.readAllLines(inputPath, StandardCharsets.UTF_8);
+            List<String> lines = Files.readAllLines(
+                    inputPath,
+                    StandardCharsets.UTF_8
+            );
 
             for (int i = 0; i < lines.size(); i++) {
                 String line = lines.get(i);
                 int lineNumber = i + 1;
 
                 try {
-                    String[] fields = line.split(";", -1);
-
-                    if (fields.length != 5) {
-                        throw new IllegalArgumentException("має бути рівно 5 полів");
-                    }
-
-                    String film = fields[0].trim();
-                    int hall = Integer.parseInt(fields[1].trim());
-                    double ticketPrice = Double.parseDouble(fields[2].trim());
-                    int sold = Integer.parseInt(fields[3].trim());
-                    int durationMin = Integer.parseInt(fields[4].trim());
-
-                    if (film.isEmpty()) {
-                        throw new IllegalArgumentException("назва фільму порожня");
-                    }
-
-                    if (hall <= 0) {
-                        throw new IllegalArgumentException("номер залу має бути додатним");
-                    }
-
-                    if (!Double.isFinite(ticketPrice) || ticketPrice < 0) {
-                        throw new IllegalArgumentException("ціна квитка має бути невід'ємною");
-                    }
-
-                    if (sold < 0) {
-                        throw new IllegalArgumentException(
-                                "кількість проданих квитків не може бути від'ємною"
-                        );
-                    }
-
-                    if (durationMin <= 0) {
-                        throw new IllegalArgumentException("тривалість фільму має бути додатною");
-                    }
-
-                    validCount++;
-                    totalRevenue += ticketPrice * sold;
-                    totalTicketPrice += ticketPrice;
-                    maxSold = Math.max(maxSold, sold);
+                    Screening screening = Screening.fromCsv(line);
+                    screenings.add(screening);
 
                     System.out.println(
-                            "Рядок %d: OK — %s".formatted(lineNumber, film)
-                    );
-
-                } catch (NumberFormatException e) {
-                    invalidCount++;
-                    System.out.println(
-                            "Рядок %d: ПОМИЛКА — неправильний числовий формат"
-                                    .formatted(lineNumber)
+                            "Рядок %d: OK — %s"
+                                    .formatted(lineNumber, screening.getFilm())
                     );
 
                 } catch (IllegalArgumentException e) {
                     invalidCount++;
+
                     System.out.println(
                             "Рядок %d: ПОМИЛКА — %s"
                                     .formatted(lineNumber, e.getMessage())
@@ -147,28 +108,36 @@ public class Main {
                 }
             }
 
-            double averageTicketPrice = validCount > 0
-                    ? totalTicketPrice / validCount
-                    : 0;
+            TicketSales ticketSales = calculateTicketSales(
+                    screenings,
+                    invalidCount
+            );
 
             report.add("===== ЗВІТ КІНОТЕАТРУ =====");
-            report.add("Правильних записів: %d".formatted(validCount));
-            report.add("Неправильних записів: %d".formatted(invalidCount));
+            report.add(
+                    "Правильних записів: %d"
+                            .formatted(ticketSales.validCount())
+            );
+            report.add(
+                    "Неправильних записів: %d"
+                            .formatted(ticketSales.invalidCount())
+            );
 
             report.add(String.format(
                     Locale.ROOT,
                     "Загальний виторг: %.2f грн",
-                    totalRevenue
+                    ticketSales.totalRevenue()
             ));
 
             report.add(String.format(
                     Locale.ROOT,
                     "Середня ціна квитка: %.2f грн",
-                    averageTicketPrice
+                    ticketSales.averageTicketPrice()
             ));
 
             report.add(
-                    "Максимальна кількість проданих квитків: %d".formatted(maxSold)
+                    "Максимальна кількість проданих квитків: %d"
+                            .formatted(ticketSales.maxSold())
             );
 
             System.out.println();
@@ -183,18 +152,60 @@ public class Main {
                 Files.createDirectories(parent);
             }
 
-            Files.write(outputPath, report, StandardCharsets.UTF_8);
+            Files.write(
+                    outputPath,
+                    report,
+                    StandardCharsets.UTF_8
+            );
 
             System.out.println();
             System.out.println(
-                    "Звіт збережено: %s".formatted(outputPath.toAbsolutePath())
+                    "Звіт збережено: %s"
+                            .formatted(outputPath.toAbsolutePath())
             );
 
         } catch (IOException e) {
             System.err.println(
-                    "Помилка роботи з файлом: %s".formatted(e.getMessage())
+                    "Помилка роботи з файлом: %s"
+                            .formatted(e.getMessage())
             );
         }
+    }
+
+    /**
+     * Обчислює статистику продажів для коректних сеансів.
+     *
+     * @param screenings коректні записи про сеанси
+     * @param invalidCount кількість некоректних CSV-записів
+     * @return незмінний підсумок продажів
+     */
+    private static TicketSales calculateTicketSales(
+            List<Screening> screenings,
+            int invalidCount
+    ) {
+        double totalRevenue = 0;
+        double totalTicketPrice = 0;
+        int maxSold = 0;
+
+        for (Screening screening : screenings) {
+            totalRevenue += screening.getTicketPrice() * screening.getSold();
+            totalTicketPrice += screening.getTicketPrice();
+            maxSold = Math.max(maxSold, screening.getSold());
+        }
+
+        int validCount = screenings.size();
+
+        double averageTicketPrice = validCount > 0
+                ? totalTicketPrice / validCount
+                : 0;
+
+        return new TicketSales(
+                validCount,
+                invalidCount,
+                totalRevenue,
+                averageTicketPrice,
+                maxSold
+        );
     }
 
     /**
@@ -202,15 +213,23 @@ public class Main {
      * командного рядка та стандартних шляхів до файлів.
      */
     private static void printHelp() {
-        System.out.println("Використання: java -jar lab01-1.0.0.jar [параметри]");
+        System.out.println(
+                "Використання: java -jar lab01-1.0.0.jar [параметри]"
+        );
         System.out.println();
         System.out.println("Параметри:");
         System.out.println("  --help           Показати довідку");
         System.out.println("  --version        Показати версію програми");
         System.out.println("  --input ШЛЯХ     Вказати вхідний CSV-файл");
-        System.out.println("  --output ШЛЯХ    Вказати шлях для збереження звіту");
+        System.out.println(
+                "  --output ШЛЯХ    Вказати шлях для збереження звіту"
+        );
         System.out.println();
-        System.out.println("Стандартний вхідний файл: data/input.csv");
-        System.out.println("Стандартний вихідний файл: out/report.txt");
+        System.out.println(
+                "Стандартний вхідний файл: data/input.csv"
+        );
+        System.out.println(
+                "Стандартний вихідний файл: out/report.txt"
+        );
     }
 }
