@@ -40,7 +40,7 @@ public class Main {
                     return;
 
                 case "--version":
-                    System.out.println("lab01 version 1.0.0");
+                    System.out.println("lab01 version 2.0.0");
                     return;
 
                 case "--input":
@@ -214,7 +214,7 @@ public class Main {
      */
     private static void printHelp() {
         System.out.println(
-                "Використання: java -jar lab01-1.0.0.jar [параметри]"
+                "Використання: java -jar lab01-2.0.0.jar [параметри]"
         );
         System.out.println();
         System.out.println("Параметри:");

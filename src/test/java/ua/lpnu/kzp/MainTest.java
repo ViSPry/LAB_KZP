@@ -1,4 +1,3 @@
-
 package ua.lpnu.kzp;
 
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,7 @@ class MainTest {
             Main.main(new String[]{"--version"});
 
             assertEquals(
-                    "lab01 version 1.0.0",
+                    "lab01 version 2.0.0",
                     output.toString(StandardCharsets.UTF_8).trim()
             );
         } finally {
@@ -81,7 +80,9 @@ class MainTest {
         assertTrue(report.contains("Неправильних записів: 0"));
         assertTrue(report.contains("Загальний виторг: 2000.00 грн"));
         assertTrue(report.contains("Середня ціна квитка: 150.00 грн"));
-        assertTrue(report.contains("Максимальна кількість проданих квитків: 10"));
+        assertTrue(report.contains(
+                "Максимальна кількість проданих квитків: 10"
+        ));
     }
 
     @Test
@@ -110,7 +111,9 @@ class MainTest {
         assertTrue(report.contains("Неправильних записів: 3"));
         assertTrue(report.contains("Загальний виторг: 2000.00 грн"));
         assertTrue(report.contains("Середня ціна квитка: 150.00 грн"));
-        assertTrue(report.contains("Максимальна кількість проданих квитків: 10"));
+        assertTrue(report.contains(
+                "Максимальна кількість проданих квитків: 10"
+        ));
     }
 
     @Test
@@ -131,7 +134,9 @@ class MainTest {
         assertTrue(report.contains("Неправильних записів: 0"));
         assertTrue(report.contains("Загальний виторг: 0.00 грн"));
         assertTrue(report.contains("Середня ціна квитка: 0.00 грн"));
-        assertTrue(report.contains("Максимальна кількість проданих квитків: 0"));
+        assertTrue(report.contains(
+                "Максимальна кількість проданих квитків: 0"
+        ));
     }
 
     @Test
@@ -143,16 +148,25 @@ class MainTest {
         ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
 
         try {
-            System.setErr(new PrintStream(errorOutput, true, StandardCharsets.UTF_8));
+            System.setErr(
+                    new PrintStream(
+                            errorOutput,
+                            true,
+                            StandardCharsets.UTF_8
+                    )
+            );
 
             Main.main(new String[]{
                     "--input", input.toString(),
                     "--output", output.toString()
             });
 
-            String errorMessage = errorOutput.toString(StandardCharsets.UTF_8);
+            String errorMessage =
+                    errorOutput.toString(StandardCharsets.UTF_8);
 
-            assertTrue(errorMessage.contains("Помилка роботи з файлом:"));
+            assertTrue(
+                    errorMessage.contains("Помилка роботи з файлом:")
+            );
             assertFalse(Files.exists(output));
         } finally {
             System.setErr(originalErr);
@@ -167,16 +181,27 @@ class MainTest {
         ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
 
         try {
-            System.setErr(new PrintStream(errorOutput, true, StandardCharsets.UTF_8));
+            System.setErr(
+                    new PrintStream(
+                            errorOutput,
+                            true,
+                            StandardCharsets.UTF_8
+                    )
+            );
 
             Main.main(new String[]{
                     "--output", output.toString(),
                     "--input", "--version"
             });
 
-            String errorMessage = errorOutput.toString(StandardCharsets.UTF_8);
+            String errorMessage =
+                    errorOutput.toString(StandardCharsets.UTF_8);
 
-            assertTrue(errorMessage.contains("після --input потрібно вказати шлях"));
+            assertTrue(
+                    errorMessage.contains(
+                            "після --input потрібно вказати шлях"
+                    )
+            );
             assertFalse(Files.exists(output));
         } finally {
             System.setErr(originalErr);
@@ -191,16 +216,27 @@ class MainTest {
         ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
 
         try {
-            System.setErr(new PrintStream(errorOutput, true, StandardCharsets.UTF_8));
+            System.setErr(
+                    new PrintStream(
+                            errorOutput,
+                            true,
+                            StandardCharsets.UTF_8
+                    )
+            );
 
             Main.main(new String[]{
                     "--output", "--input",
                     "--input", "data/input.csv"
             });
 
-            String errorMessage = errorOutput.toString(StandardCharsets.UTF_8);
+            String errorMessage =
+                    errorOutput.toString(StandardCharsets.UTF_8);
 
-            assertTrue(errorMessage.contains("після --output потрібно вказати шлях"));
+            assertTrue(
+                    errorMessage.contains(
+                            "після --output потрібно вказати шлях"
+                    )
+            );
             assertFalse(Files.exists(output));
         } finally {
             System.setErr(originalErr);
