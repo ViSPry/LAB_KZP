@@ -822,7 +822,7 @@ Workflow запускає збірку на:
 
 **Посилання на фінальний CI ЛР №3:**
 
-буде додано після фінального запуску
+буде додано після фінального запуску https://github.com/ViSPry/LAB_KZP/actions/runs/37505114738
 
 ---
 
@@ -836,7 +836,7 @@ Workflow формує JAR artifact для результатів збірки.
 
 **Посилання на workflow з JAR artifact:**
 
-буде додано після фінального запуску CI
+буде додано після фінального запуску CI https://github.com/ViSPry/LAB_KZP/actions/runs/37505114738
 
 ---
 
@@ -864,7 +864,7 @@ Workflow формує JAR artifact для результатів збірки.
 
 **Посилання на Pull Request ЛР №3:**
 
-буде додано після створення PR
+буде додано після створення PR https://github.com/ViSPry/LAB_KZP/pull/17
 
 ---
 
