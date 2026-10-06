@@ -175,7 +175,11 @@ public class Main {
     /**
      * Обчислює статистику продажів для коректних сеансів.
      *
-     * @param screenings коректні записи про сеанси
+     * <p>Виторг обчислюється поліморфно через
+     * {@link Screening#revenue()}. Метод не перевіряє конкретний
+     * підтип сеансу через {@code if} або {@code switch}.</p>
+     *
+     * @param screenings коректні записи про сеанси різних підтипів
      * @param invalidCount кількість некоректних CSV-записів
      * @return незмінний підсумок продажів
      */
@@ -188,7 +192,7 @@ public class Main {
         int maxSold = 0;
 
         for (Screening screening : screenings) {
-            totalRevenue += screening.getTicketPrice() * screening.getSold();
+            totalRevenue += screening.revenue();
             totalTicketPrice += screening.getTicketPrice();
             maxSold = Math.max(maxSold, screening.getSold());
         }
