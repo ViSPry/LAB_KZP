@@ -13,7 +13,8 @@ import java.util.Objects;
  * <p>Об'єкти є незмінними: усі поля оголошені як
  * {@code private final}, а публічні сеттери відсутні.</p>
  */
-public abstract class Screening {
+public abstract sealed class Screening
+        permits RegularScreening, PremiumScreening {
 
     private final String film;
     private final int hall;
@@ -311,7 +312,6 @@ public abstract class Screening {
                 durationMin
         );
     }
-
     /**
      * Внутрішнє незмінне представлення вже перевірених даних.
      *

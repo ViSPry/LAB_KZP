@@ -94,8 +94,12 @@ public class Main {
                     screenings.add(screening);
 
                     System.out.println(
-                            "Рядок %d: OK — %s"
-                                    .formatted(lineNumber, screening.getFilm())
+                            "Рядок %d: OK — %s (%s)"
+                                    .formatted(
+                                            lineNumber,
+                                            screening.getFilm(),
+                                            describeScreening(screening)
+                                    )
                     );
 
                 } catch (IllegalArgumentException e) {
@@ -170,6 +174,34 @@ public class Main {
                             .formatted(e.getMessage())
             );
         }
+    }
+
+    /**
+     * Повертає текстовий опис конкретного підтипу сеансу.
+     *
+     * <p>Метод демонструє pattern matching для {@code switch}
+     * над sealed-ієрархією {@link Screening}. Оскільки базовий клас
+     * дозволяє лише {@link RegularScreening} і
+     * {@link PremiumScreening}, компілятор може перевірити
+     * вичерпність цього {@code switch}.</p>
+     *
+     * <p>Цей метод не обчислює виторг. Поліморфна бізнес-логіка
+     * залишається в перевизначених методах {@link Screening#revenue()}.</p>
+     *
+     * @param screening сеанс для опису
+     * @return текстовий опис типу сеансу
+     */
+    private static String describeScreening(Screening screening) {
+        return switch (screening) {
+            case RegularScreening regular ->
+                    regular.getKind().getLabel();
+
+            case PremiumScreening premium ->
+                    "%s, доплата %.2f грн".formatted(
+                            premium.getKind().getLabel(),
+                            premium.getPremiumFee()
+                    );
+        };
     }
 
     /**
