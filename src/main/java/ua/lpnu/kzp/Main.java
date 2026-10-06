@@ -40,7 +40,7 @@ public class Main {
                     return;
 
                 case "--version":
-                    System.out.println("lab01 version 2.0.0");
+                    System.out.println("lab01 version 3.0.0");
                     return;
 
                 case "--input":
@@ -94,8 +94,12 @@ public class Main {
                     screenings.add(screening);
 
                     System.out.println(
-                            "Рядок %d: OK — %s"
-                                    .formatted(lineNumber, screening.getFilm())
+                            "Рядок %d: OK — %s (%s)"
+                                    .formatted(
+                                            lineNumber,
+                                            screening.getFilm(),
+                                            describeScreening(screening)
+                                    )
                     );
 
                 } catch (IllegalArgumentException e) {
@@ -173,9 +177,41 @@ public class Main {
     }
 
     /**
+     * Повертає текстовий опис конкретного підтипу сеансу.
+     *
+     * <p>Метод демонструє pattern matching для {@code switch}
+     * над sealed-ієрархією {@link Screening}. Оскільки базовий клас
+     * дозволяє лише {@link RegularScreening} і
+     * {@link PremiumScreening}, компілятор може перевірити
+     * вичерпність цього {@code switch}.</p>
+     *
+     * <p>Цей метод не обчислює виторг. Поліморфна бізнес-логіка
+     * залишається в перевизначених методах {@link Screening#revenue()}.</p>
+     *
+     * @param screening сеанс для опису
+     * @return текстовий опис типу сеансу
+     */
+    private static String describeScreening(Screening screening) {
+        return switch (screening) {
+            case RegularScreening regular ->
+                    regular.getKind().getLabel();
+
+            case PremiumScreening premium ->
+                    "%s, доплата %.2f грн".formatted(
+                            premium.getKind().getLabel(),
+                            premium.getPremiumFee()
+                    );
+        };
+    }
+
+    /**
      * Обчислює статистику продажів для коректних сеансів.
      *
-     * @param screenings коректні записи про сеанси
+     * <p>Виторг обчислюється поліморфно через
+     * {@link Screening#revenue()}. Метод не перевіряє конкретний
+     * підтип сеансу через {@code if} або {@code switch}.</p>
+     *
+     * @param screenings коректні записи про сеанси різних підтипів
      * @param invalidCount кількість некоректних CSV-записів
      * @return незмінний підсумок продажів
      */
@@ -188,7 +224,7 @@ public class Main {
         int maxSold = 0;
 
         for (Screening screening : screenings) {
-            totalRevenue += screening.getTicketPrice() * screening.getSold();
+            totalRevenue += screening.revenue();
             totalTicketPrice += screening.getTicketPrice();
             maxSold = Math.max(maxSold, screening.getSold());
         }
@@ -214,7 +250,7 @@ public class Main {
      */
     private static void printHelp() {
         System.out.println(
-                "Використання: java -jar lab01-2.0.0.jar [параметри]"
+                "Використання: java -jar lab01-3.0.0.jar [параметри]"
         );
         System.out.println();
         System.out.println("Параметри:");

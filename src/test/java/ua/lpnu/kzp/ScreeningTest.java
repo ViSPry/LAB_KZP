@@ -3,13 +3,14 @@ package ua.lpnu.kzp;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ScreeningTest {
 
     @Test
     void constructorCreatesValidScreening() {
-        Screening screening = new Screening(
+        Screening screening = new RegularScreening(
                 "Дюна 2",
                 1,
                 200.0,
@@ -26,7 +27,7 @@ class ScreeningTest {
 
     @Test
     void constructorAcceptsBoundaryValues() {
-        Screening screening = new Screening(
+        Screening screening = new RegularScreening(
                 "Фільм",
                 1,
                 0.0,
@@ -42,7 +43,13 @@ class ScreeningTest {
     void constructorRejectsBlankFilm() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new Screening("   ", 1, 100.0, 10, 120)
+                () -> new RegularScreening(
+                        "   ",
+                        1,
+                        100.0,
+                        10,
+                        120
+                )
         );
     }
 
@@ -50,7 +57,13 @@ class ScreeningTest {
     void constructorRejectsInvalidHall() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new Screening("Фільм", 0, 100.0, 10, 120)
+                () -> new RegularScreening(
+                        "Фільм",
+                        0,
+                        100.0,
+                        10,
+                        120
+                )
         );
     }
 
@@ -58,7 +71,13 @@ class ScreeningTest {
     void constructorRejectsNegativeTicketPrice() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new Screening("Фільм", 1, -1.0, 10, 120)
+                () -> new RegularScreening(
+                        "Фільм",
+                        1,
+                        -1.0,
+                        10,
+                        120
+                )
         );
     }
 
@@ -66,7 +85,7 @@ class ScreeningTest {
     void constructorRejectsNonFiniteTicketPrice() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new Screening(
+                () -> new RegularScreening(
                         "Фільм",
                         1,
                         Double.NaN,
@@ -80,7 +99,13 @@ class ScreeningTest {
     void constructorRejectsNegativeSold() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new Screening("Фільм", 1, 100.0, -1, 120)
+                () -> new RegularScreening(
+                        "Фільм",
+                        1,
+                        100.0,
+                        -1,
+                        120
+                )
         );
     }
 
@@ -88,7 +113,13 @@ class ScreeningTest {
     void constructorRejectsInvalidDuration() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new Screening("Фільм", 1, 100.0, 10, 0)
+                () -> new RegularScreening(
+                        "Фільм",
+                        1,
+                        100.0,
+                        10,
+                        0
+                )
         );
     }
 
@@ -103,13 +134,16 @@ class ScreeningTest {
         assertEquals(200.0, screening.getTicketPrice());
         assertEquals(100, screening.getSold());
         assertEquals(166, screening.getDurationMin());
+        assertInstanceOf(PremiumScreening.class, screening);
     }
 
     @Test
     void fromCsvRejectsWrongFieldCount() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> Screening.fromCsv("Дюна 2;1;200.0")
+                () -> Screening.fromCsv(
+                        "Дюна 2;1;200.0"
+                )
         );
     }
 
@@ -124,14 +158,14 @@ class ScreeningTest {
     }
 
     @Test
-    void builderCreatesValidScreening() {
-        Screening screening = Screening.builder()
-                .film("Інтерстеллар")
-                .hall(2)
-                .ticketPrice(180.0)
-                .sold(150)
-                .durationMin(169)
-                .build();
+    void regularScreeningPreservesBuilderValidScenario() {
+        Screening screening = new RegularScreening(
+                "Інтерстеллар",
+                2,
+                180.0,
+                150,
+                169
+        );
 
         assertEquals("Інтерстеллар", screening.getFilm());
         assertEquals(2, screening.getHall());
@@ -141,16 +175,16 @@ class ScreeningTest {
     }
 
     @Test
-    void builderCannotBypassValidation() {
+    void constructorCannotBypassValidation() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> Screening.builder()
-                        .film("Матриця")
-                        .hall(-1)
-                        .ticketPrice(150.0)
-                        .sold(50)
-                        .durationMin(136)
-                        .build()
+                () -> new RegularScreening(
+                        "Матриця",
+                        -1,
+                        150.0,
+                        50,
+                        136
+                )
         );
     }
 }

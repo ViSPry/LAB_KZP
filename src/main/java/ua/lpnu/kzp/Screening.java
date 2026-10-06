@@ -1,15 +1,20 @@
 package ua.lpnu.kzp;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
- * Представляє один сеанс кінотеатру.
+ * Базовий тип для сеансів кінотеатру.
  *
- * <p>Клас є незмінним: усі поля оголошені як {@code private final},
- * а публічні сеттери відсутні. Коректність даних перевіряється
- * під час створення об'єкта.</p>
+ * <p>Клас містить спільний стан та правила валідації для всіх
+ * типів сеансів. Конкретний спосіб обчислення виторгу визначається
+ * у підкласах через метод {@link #revenue()}.</p>
+ *
+ * <p>Об'єкти є незмінними: усі поля оголошені як
+ * {@code private final}, а публічні сеттери відсутні.</p>
  */
-public final class Screening {
+public abstract sealed class Screening
+        permits RegularScreening, PremiumScreening {
 
     private final String film;
     private final int hall;
@@ -18,7 +23,7 @@ public final class Screening {
     private final int durationMin;
 
     /**
-     * Створює новий сеанс кінотеатру.
+     * Створює базову частину сеансу кінотеатру.
      *
      * @param film назва фільму
      * @param hall номер залу
@@ -28,7 +33,47 @@ public final class Screening {
      * @throws IllegalArgumentException якщо передані дані
      *                                  не відповідають правилам валідації
      */
-    public Screening(
+    protected Screening(
+            String film,
+            int hall,
+            double ticketPrice,
+            int sold,
+            int durationMin
+    ) {
+        this(validate(
+                film,
+                hall,
+                ticketPrice,
+                sold,
+                durationMin
+        ));
+    }
+
+    /**
+     * Ініціалізує об'єкт уже перевіреними даними.
+     *
+     * @param data перевірені дані сеансу
+     */
+    private Screening(ValidatedData data) {
+        this.film = data.film();
+        this.hall = data.hall();
+        this.ticketPrice = data.ticketPrice();
+        this.sold = data.sold();
+        this.durationMin = data.durationMin();
+    }
+
+    /**
+     * Перевіряє дані до початку ініціалізації базового об'єкта.
+     *
+     * @param film назва фільму
+     * @param hall номер залу
+     * @param ticketPrice ціна квитка
+     * @param sold кількість проданих квитків
+     * @param durationMin тривалість фільму у хвилинах
+     * @return перевірені дані
+     * @throws IllegalArgumentException якщо дані некоректні
+     */
+    private static ValidatedData validate(
             String film,
             int hall,
             double ticketPrice,
@@ -65,23 +110,31 @@ public final class Screening {
             );
         }
 
-        this.film = film;
-        this.hall = hall;
-        this.ticketPrice = ticketPrice;
-        this.sold = sold;
-        this.durationMin = durationMin;
+        return new ValidatedData(
+                film,
+                hall,
+                ticketPrice,
+                sold,
+                durationMin
+        );
     }
 
     /**
-     * Створює об'єкт {@code Screening} з одного CSV-рядка.
+     * Створює конкретний сеанс з одного CSV-рядка.
      *
-     * <p>Очікується п'ять полів у форматі:
+     * <p>Формат залишається таким самим, як у попередній
+     * лабораторній роботі:
      * film;hall;ticketPrice;sold;durationMin.</p>
      *
+     * <p>Тип сеансу визначається за номером залу:
+     * зал 1 створює {@link PremiumScreening}, інші зали —
+     * {@link RegularScreening}. Це дозволяє зберегти
+     * попередній CSV-формат без додаткового поля.</p>
+     *
      * @param line CSV-рядок
-     * @return створений об'єкт {@code Screening}
+     * @return конкретний підтип {@code Screening}
      * @throws IllegalArgumentException якщо рядок має неправильну
-     *                                  структуру або містить некоректні дані
+     *                                  структуру або некоректні дані
      */
     public static Screening fromCsv(String line) {
         if (line == null) {
@@ -105,7 +158,17 @@ public final class Screening {
             int sold = Integer.parseInt(parts[3].trim());
             int durationMin = Integer.parseInt(parts[4].trim());
 
-            return new Screening(
+            if (hall == 1) {
+                return new PremiumScreening(
+                        film,
+                        hall,
+                        ticketPrice,
+                        sold,
+                        durationMin
+                );
+            }
+
+            return new RegularScreening(
                     film,
                     hall,
                     ticketPrice,
@@ -119,6 +182,35 @@ public final class Screening {
             );
         }
     }
+
+    /**
+     * Обчислює виторг конкретного типу сеансу.
+     *
+     * @return виторг сеансу
+     */
+    public abstract double revenue();
+
+    /**
+     * Повертає категорію сеансу.
+     *
+     * @return категорія сеансу
+     */
+    public abstract ScreeningKind getKind();
+
+    /**
+     * Порівнює специфічний стан конкретного підтипу.
+     *
+     * @param other інший об'єкт того самого конкретного підтипу
+     * @return {@code true}, якщо специфічний стан збігається
+     */
+    protected abstract boolean hasSameSubtypeState(Screening other);
+
+    /**
+     * Повертає складову хеш-коду, специфічну для підтипу.
+     *
+     * @return специфічна складова хеш-коду
+     */
+    protected abstract Object subtypeHashComponent();
 
     /**
      * @return назва фільму
@@ -156,19 +248,54 @@ public final class Screening {
     }
 
     /**
-     * Створює Builder для покрокового формування об'єкта.
+     * Порівнює два сеанси за спільним та специфічним станом.
      *
-     * @return новий Builder
+     * <p>Об'єкти різних конкретних підтипів не вважаються рівними,
+     * навіть якщо значення їхніх спільних полів збігаються.</p>
+     *
+     * @param object об'єкт для порівняння
+     * @return {@code true}, якщо об'єкти логічно рівні
      */
-    public static Builder builder() {
-        return new Builder();
+    @Override
+    public final boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        Screening other = (Screening) object;
+
+        return hall == other.hall
+                && Double.compare(ticketPrice, other.ticketPrice) == 0
+                && sold == other.sold
+                && durationMin == other.durationMin
+                && film.equals(other.film)
+                && hasSameSubtypeState(other);
     }
 
     /**
-     * Повертає текстове представлення сеансу.
+     * Повертає хеш-код, узгоджений з {@link #equals(Object)}.
      *
-     * <p>{@link Locale#ROOT} використовується для отримання
-     * стабільного форматування незалежно від системної локалі.</p>
+     * @return хеш-код сеансу
+     */
+    @Override
+    public final int hashCode() {
+        return Objects.hash(
+                getClass(),
+                film,
+                hall,
+                ticketPrice,
+                sold,
+                durationMin,
+                subtypeHashComponent()
+        );
+    }
+
+    /**
+     * Повертає текстове представлення спільної частини сеансу.
      *
      * @return текстове представлення об'єкта
      */
@@ -176,8 +303,8 @@ public final class Screening {
     public String toString() {
         return String.format(
                 Locale.ROOT,
-                "Screening{film='%s', hall=%d, "
-                        + "ticketPrice=%.2f, sold=%d, durationMin=%d}",
+                "%s{film='%s', hall=%d, ticketPrice=%.2f, sold=%d, durationMin=%d}",
+                getClass().getSimpleName(),
                 film,
                 hall,
                 ticketPrice,
@@ -185,85 +312,21 @@ public final class Screening {
                 durationMin
         );
     }
-
     /**
-     * Builder для створення незмінного {@link Screening}.
+     * Внутрішнє незмінне представлення вже перевірених даних.
      *
-     * <p>Builder не обходить правила валідації:
-     * метод {@link #build()} викликає основний конструктор
-     * {@code Screening}.</p>
+     * @param film назва фільму
+     * @param hall номер залу
+     * @param ticketPrice ціна квитка
+     * @param sold кількість проданих квитків
+     * @param durationMin тривалість фільму у хвилинах
      */
-    public static final class Builder {
-
-        private String film;
-        private int hall;
-        private double ticketPrice;
-        private int sold;
-        private int durationMin;
-
-        private Builder() {
-        }
-
-        /**
-         * @param film назва фільму
-         * @return поточний Builder
-         */
-        public Builder film(String film) {
-            this.film = film;
-            return this;
-        }
-
-        /**
-         * @param hall номер залу
-         * @return поточний Builder
-         */
-        public Builder hall(int hall) {
-            this.hall = hall;
-            return this;
-        }
-
-        /**
-         * @param ticketPrice ціна квитка
-         * @return поточний Builder
-         */
-        public Builder ticketPrice(double ticketPrice) {
-            this.ticketPrice = ticketPrice;
-            return this;
-        }
-
-        /**
-         * @param sold кількість проданих квитків
-         * @return поточний Builder
-         */
-        public Builder sold(int sold) {
-            this.sold = sold;
-            return this;
-        }
-
-        /**
-         * @param durationMin тривалість фільму у хвилинах
-         * @return поточний Builder
-         */
-        public Builder durationMin(int durationMin) {
-            this.durationMin = durationMin;
-            return this;
-        }
-
-        /**
-         * Створює {@link Screening} через його основний конструктор.
-         *
-         * @return валідний незмінний об'єкт {@code Screening}
-         * @throws IllegalArgumentException якщо значення Builder
-         *                                  не проходять валідацію
-         */
-        public Screening build() {
-            return new Screening(
-                    film,
-                    hall,
-                    ticketPrice,
-                    sold,
-                    durationMin
-            );
-        }
+    private record ValidatedData(
+            String film,
+            int hall,
+            double ticketPrice,
+            int sold,
+            int durationMin
+    ) {
     }
 }
