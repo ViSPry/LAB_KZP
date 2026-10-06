@@ -29,7 +29,7 @@ class MainTest {
             Main.main(new String[]{"--version"});
 
             assertEquals(
-                    "lab01 version 2.0.0",
+                    "lab01 version 3.0.0",
                     output.toString(StandardCharsets.UTF_8).trim()
             );
         } finally {
