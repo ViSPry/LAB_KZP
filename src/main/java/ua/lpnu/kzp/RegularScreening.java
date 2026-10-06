@@ -4,7 +4,7 @@ package ua.lpnu.kzp;
  * Представляє звичайний сеанс кінотеатру.
  *
  * <p>Виторг звичайного сеансу визначається як добуток
- * ціни одного квитка на кількість проданих квитків.</p>
+ * ціни квитка на кількість проданих квитків.</p>
  */
 public final class RegularScreening extends Screening {
 
@@ -16,8 +16,7 @@ public final class RegularScreening extends Screening {
      * @param ticketPrice ціна квитка
      * @param sold кількість проданих квитків
      * @param durationMin тривалість фільму у хвилинах
-     * @throws IllegalArgumentException якщо дані не проходять
-     *                                  валідацію базового класу
+     * @throws IllegalArgumentException якщо дані не проходять валідацію
      */
     public RegularScreening(
             String film,
@@ -38,7 +37,7 @@ public final class RegularScreening extends Screening {
     /**
      * Обчислює виторг звичайного сеансу.
      *
-     * @return ціна квитка, помножена на кількість проданих квитків
+     * @return добуток ціни квитка на кількість проданих квитків
      */
     @Override
     public double revenue() {
@@ -53,5 +52,26 @@ public final class RegularScreening extends Screening {
     @Override
     public ScreeningKind getKind() {
         return ScreeningKind.REGULAR;
+    }
+
+    /**
+     * Звичайний сеанс не має додаткового стану підтипу.
+     *
+     * @param other інший звичайний сеанс
+     * @return завжди {@code true}
+     */
+    @Override
+    protected boolean hasSameSubtypeState(Screening other) {
+        return true;
+    }
+
+    /**
+     * Звичайний сеанс не має додаткової складової хеш-коду.
+     *
+     * @return {@code null}
+     */
+    @Override
+    protected Object subtypeHashComponent() {
+        return null;
     }
 }

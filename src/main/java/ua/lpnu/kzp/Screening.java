@@ -197,6 +197,21 @@ public abstract class Screening {
     public abstract ScreeningKind getKind();
 
     /**
+     * Порівнює специфічний стан конкретного підтипу.
+     *
+     * @param other інший об'єкт того самого конкретного підтипу
+     * @return {@code true}, якщо специфічний стан збігається
+     */
+    protected abstract boolean hasSameSubtypeState(Screening other);
+
+    /**
+     * Повертає складову хеш-коду, специфічну для підтипу.
+     *
+     * @return специфічна складова хеш-коду
+     */
+    protected abstract Object subtypeHashComponent();
+
+    /**
      * @return назва фільму
      */
     public String getFilm() {
@@ -232,10 +247,10 @@ public abstract class Screening {
     }
 
     /**
-     * Порівнює спільний стан двох сеансів.
+     * Порівнює два сеанси за спільним та специфічним станом.
      *
      * <p>Об'єкти різних конкретних підтипів не вважаються рівними,
-     * навіть якщо значення їхніх полів збігаються.</p>
+     * навіть якщо значення їхніх спільних полів збігаються.</p>
      *
      * @param object об'єкт для порівняння
      * @return {@code true}, якщо об'єкти логічно рівні
@@ -256,7 +271,8 @@ public abstract class Screening {
                 && Double.compare(ticketPrice, other.ticketPrice) == 0
                 && sold == other.sold
                 && durationMin == other.durationMin
-                && film.equals(other.film);
+                && film.equals(other.film)
+                && hasSameSubtypeState(other);
     }
 
     /**
@@ -272,7 +288,8 @@ public abstract class Screening {
                 hall,
                 ticketPrice,
                 sold,
-                durationMin
+                durationMin,
+                subtypeHashComponent()
         );
     }
 

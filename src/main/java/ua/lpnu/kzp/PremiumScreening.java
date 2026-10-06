@@ -87,8 +87,8 @@ public final class PremiumScreening extends Screening {
     /**
      * Обчислює виторг преміального сеансу.
      *
-     * <p>На відміну від звичайного сеансу, до базової ціни
-     * кожного проданого квитка додається преміальна плата.</p>
+     * <p>До базової ціни кожного проданого квитка додається
+     * преміальна плата.</p>
      *
      * @return виторг преміального сеансу
      */
@@ -105,5 +105,31 @@ public final class PremiumScreening extends Screening {
     @Override
     public ScreeningKind getKind() {
         return ScreeningKind.PREMIUM;
+    }
+
+    /**
+     * Порівнює додатковий стан двох преміальних сеансів.
+     *
+     * @param other інший преміальний сеанс
+     * @return {@code true}, якщо додаткова плата збігається
+     */
+    @Override
+    protected boolean hasSameSubtypeState(Screening other) {
+        PremiumScreening premium = (PremiumScreening) other;
+
+        return Double.compare(
+                premiumFee,
+                premium.premiumFee
+        ) == 0;
+    }
+
+    /**
+     * Повертає додаткову складову хеш-коду преміального сеансу.
+     *
+     * @return значення додаткової плати
+     */
+    @Override
+    protected Object subtypeHashComponent() {
+        return premiumFee;
     }
 }

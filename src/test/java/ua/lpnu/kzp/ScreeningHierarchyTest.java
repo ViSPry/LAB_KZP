@@ -159,6 +159,30 @@ class ScreeningHierarchyTest {
     }
 
     @Test
+    void premiumScreeningsWithDifferentFeesAreNotEqual() {
+        Screening first = new PremiumScreening(
+                "Дюна 2",
+                1,
+                200.0,
+                100,
+                166,
+                20.0
+        );
+
+        Screening second = new PremiumScreening(
+                "Дюна 2",
+                1,
+                200.0,
+                100,
+                166,
+                25.0
+        );
+
+        assertNotEquals(first, second);
+        assertNotEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
     void hashSetDoesNotStoreDuplicateScreenings() {
         Set<Screening> screenings = new HashSet<>();
 
