@@ -1,11 +1,13 @@
+
 package ua.lpnu.kzp;
+
+import java.time.LocalTime;
 
 /**
  * Представляє преміальний сеанс кінотеатру.
  *
- * <p>Клас демонструє окрему реалізацію поліморфної операції
- * обчислення виторгу. Додаткова плата задається для кожного
- * проданого квитка.</p>
+ * <p>Виторг враховує базову ціну квитка
+ * та додаткову преміальну плату.</p>
  */
 public final class PremiumScreening extends Screening {
 
@@ -13,16 +15,6 @@ public final class PremiumScreening extends Screening {
 
     /**
      * Створює преміальний сеанс без додаткової плати.
-     *
-     * <p>Цей конструктор використовується під час читання старого
-     * CSV-формату та дозволяє зберегти результати попередньої
-     * лабораторної роботи.</p>
-     *
-     * @param film назва фільму
-     * @param hall номер залу
-     * @param ticketPrice ціна квитка
-     * @param sold кількість проданих квитків
-     * @param durationMin тривалість фільму у хвилинах
      */
     public PremiumScreening(
             String film,
@@ -37,20 +29,13 @@ public final class PremiumScreening extends Screening {
                 ticketPrice,
                 sold,
                 durationMin,
-                0.0
+                0.0,
+                LocalTime.MIDNIGHT
         );
     }
 
     /**
-     * Створює преміальний сеанс із додатковою платою за квиток.
-     *
-     * @param film назва фільму
-     * @param hall номер залу
-     * @param ticketPrice базова ціна квитка
-     * @param sold кількість проданих квитків
-     * @param durationMin тривалість фільму у хвилинах
-     * @param premiumFee додаткова плата за один квиток
-     * @throws IllegalArgumentException якщо дані не проходять валідацію
+     * Створює преміальний сеанс із додатковою платою.
      */
     public PremiumScreening(
             String film,
@@ -60,15 +45,81 @@ public final class PremiumScreening extends Screening {
             int durationMin,
             double premiumFee
     ) {
+        this(
+                film,
+                hall,
+                ticketPrice,
+                sold,
+                durationMin,
+                premiumFee,
+                LocalTime.MIDNIGHT
+        );
+    }
+
+    /**
+     * Створює преміальний сеанс із часом початку.
+     */
+    public PremiumScreening(
+            String film,
+            int hall,
+            double ticketPrice,
+            int sold,
+            int durationMin,
+            LocalTime startTime
+    ) {
+        this(
+                film,
+                hall,
+                ticketPrice,
+                sold,
+                durationMin,
+                0.0,
+                startTime
+        );
+    }
+
+    /**
+     * Створює преміальний сеанс із додатковою платою
+     * та часом початку.
+     *
+     * @param film назва фільму
+     * @param hall номер залу
+     * @param ticketPrice базова ціна квитка
+     * @param sold кількість проданих квитків
+     * @param durationMin тривалість фільму
+     * @param premiumFee додаткова плата за квиток
+     * @param startTime час початку сеансу
+     * @throws IllegalArgumentException якщо дані некоректні
+     */
+    public PremiumScreening(
+            String film,
+            int hall,
+            double ticketPrice,
+            int sold,
+            int durationMin,
+            double premiumFee,
+            LocalTime startTime
+    ) {
         super(
                 film,
                 hall,
                 ticketPrice,
                 sold,
-                durationMin
+                durationMin,
+                startTime
         );
 
-        if (!Double.isFinite(premiumFee) || premiumFee < 0) {
+        validateCommon(
+                film,
+                hall,
+                ticketPrice,
+                sold,
+                durationMin,
+                startTime
+        );
+
+        if (!Double.isFinite(premiumFee)
+                || premiumFee < 0) {
             throw new IllegalArgumentException(
                     "додаткова плата має бути невід'ємною"
             );
@@ -78,7 +129,9 @@ public final class PremiumScreening extends Screening {
     }
 
     /**
-     * @return додаткова плата за один преміальний квиток
+     * Повертає додаткову плату за преміальний квиток.
+     *
+     * @return додаткова плата
      */
     public double getPremiumFee() {
         return premiumFee;
@@ -87,10 +140,7 @@ public final class PremiumScreening extends Screening {
     /**
      * Обчислює виторг преміального сеансу.
      *
-     * <p>До базової ціни кожного проданого квитка додається
-     * преміальна плата.</p>
-     *
-     * @return виторг преміального сеансу
+     * @return виторг
      */
     @Override
     public double revenue() {
@@ -98,9 +148,9 @@ public final class PremiumScreening extends Screening {
     }
 
     /**
-     * Повертає категорію сеансу.
+     * Повертає категорію преміального сеансу.
      *
-     * @return {@link ScreeningKind#PREMIUM}
+     * @return PREMIUM
      */
     @Override
     public ScreeningKind getKind() {
@@ -108,10 +158,10 @@ public final class PremiumScreening extends Screening {
     }
 
     /**
-     * Порівнює додатковий стан двох преміальних сеансів.
+     * Порівнює додатковий стан преміальних сеансів.
      *
-     * @param other інший преміальний сеанс
-     * @return {@code true}, якщо додаткова плата збігається
+     * @param other інший сеанс
+     * @return true, якщо додаткова плата збігається
      */
     @Override
     protected boolean hasSameSubtypeState(Screening other) {
@@ -124,9 +174,9 @@ public final class PremiumScreening extends Screening {
     }
 
     /**
-     * Повертає додаткову складову хеш-коду преміального сеансу.
+     * Повертає складову хеш-коду преміального сеансу.
      *
-     * @return значення додаткової плати
+     * @return додаткова плата
      */
     @Override
     protected Object subtypeHashComponent() {

@@ -9,7 +9,7 @@
 
     <groupId>ua.lpnu.kzp</groupId>
     <artifactId>lab01</artifactId>
-    <version>3.0.0</version>
+    <version>4.0.0</version>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
@@ -23,6 +23,14 @@
             <artifactId>junit-jupiter</artifactId>
             <version>5.10.2</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- Анотації для точкового приглушення попереджень SpotBugs -->
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>4.8.6</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

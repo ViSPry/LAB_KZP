@@ -1,17 +1,15 @@
+
 package ua.lpnu.kzp;
 
+import java.time.LocalTime;
 import java.util.Locale;
 import java.util.Objects;
 
 /**
  * Базовий тип для сеансів кінотеатру.
  *
- * <p>Клас містить спільний стан та правила валідації для всіх
- * типів сеансів. Конкретний спосіб обчислення виторгу визначається
- * у підкласах через метод {@link #revenue()}.</p>
- *
- * <p>Об'єкти є незмінними: усі поля оголошені як
- * {@code private final}, а публічні сеттери відсутні.</p>
+ * <p>Зберігає спільний незмінний стан.
+ * Перевірка аргументів виконується у кінцевих підкласах.</p>
  */
 public abstract sealed class Screening
         permits RegularScreening, PremiumScreening {
@@ -21,17 +19,10 @@ public abstract sealed class Screening
     private final double ticketPrice;
     private final int sold;
     private final int durationMin;
+    private final LocalTime startTime;
 
     /**
-     * Створює базову частину сеансу кінотеатру.
-     *
-     * @param film назва фільму
-     * @param hall номер залу
-     * @param ticketPrice ціна квитка
-     * @param sold кількість проданих квитків
-     * @param durationMin тривалість фільму у хвилинах
-     * @throws IllegalArgumentException якщо передані дані
-     *                                  не відповідають правилам валідації
+     * Конструктор для сумісності з попередніми лабораторними.
      */
     protected Screening(
             String film,
@@ -40,45 +31,52 @@ public abstract sealed class Screening
             int sold,
             int durationMin
     ) {
-        this(validate(
+        this(
                 film,
                 hall,
                 ticketPrice,
                 sold,
-                durationMin
-        ));
+                durationMin,
+                LocalTime.MIDNIGHT
+        );
     }
 
     /**
-     * Ініціалізує об'єкт уже перевіреними даними.
+     * Зберігає дані без перевірок, що можуть викинути виняток.
      *
-     * @param data перевірені дані сеансу
+     * <p>Конкретні final-підкласи зобов'язані
+     * перевірити аргументи конструктора.</p>
      */
-    private Screening(ValidatedData data) {
-        this.film = data.film();
-        this.hall = data.hall();
-        this.ticketPrice = data.ticketPrice();
-        this.sold = data.sold();
-        this.durationMin = data.durationMin();
-    }
-
-    /**
-     * Перевіряє дані до початку ініціалізації базового об'єкта.
-     *
-     * @param film назва фільму
-     * @param hall номер залу
-     * @param ticketPrice ціна квитка
-     * @param sold кількість проданих квитків
-     * @param durationMin тривалість фільму у хвилинах
-     * @return перевірені дані
-     * @throws IllegalArgumentException якщо дані некоректні
-     */
-    private static ValidatedData validate(
+    protected Screening(
             String film,
             int hall,
             double ticketPrice,
             int sold,
-            int durationMin
+            int durationMin,
+            LocalTime startTime
+    ) {
+        this.film = film;
+        this.hall = hall;
+        this.ticketPrice = ticketPrice;
+        this.sold = sold;
+        this.durationMin = durationMin;
+        this.startTime = startTime;
+    }
+
+    /**
+     * Перевіряє спільні інваріанти предметної моделі.
+     *
+     * <p>Викликається конструкторами final-підкласів.</p>
+     *
+     * @throws IllegalArgumentException якщо дані некоректні
+     */
+    protected static void validateCommon(
+            String film,
+            int hall,
+            double ticketPrice,
+            int sold,
+            int durationMin,
+            LocalTime startTime
     ) {
         if (film == null || film.isBlank()) {
             throw new IllegalArgumentException(
@@ -110,31 +108,18 @@ public abstract sealed class Screening
             );
         }
 
-        return new ValidatedData(
-                film,
-                hall,
-                ticketPrice,
-                sold,
-                durationMin
-        );
+        if (startTime == null) {
+            throw new IllegalArgumentException(
+                    "час початку сеансу не може бути null"
+            );
+        }
     }
 
     /**
-     * Створює конкретний сеанс з одного CSV-рядка.
-     *
-     * <p>Формат залишається таким самим, як у попередній
-     * лабораторній роботі:
-     * film;hall;ticketPrice;sold;durationMin.</p>
-     *
-     * <p>Тип сеансу визначається за номером залу:
-     * зал 1 створює {@link PremiumScreening}, інші зали —
-     * {@link RegularScreening}. Це дозволяє зберегти
-     * попередній CSV-формат без додаткового поля.</p>
+     * Створює сеанс із CSV-рядка старого формату.
      *
      * @param line CSV-рядок
-     * @return конкретний підтип {@code Screening}
-     * @throws IllegalArgumentException якщо рядок має неправильну
-     *                                  структуру або некоректні дані
+     * @return конкретний підтип Screening
      */
     public static Screening fromCsv(String line) {
         if (line == null) {
@@ -154,26 +139,20 @@ public abstract sealed class Screening
         try {
             String film = parts[0].trim();
             int hall = Integer.parseInt(parts[1].trim());
-            double ticketPrice = Double.parseDouble(parts[2].trim());
+            double ticketPrice =
+                    Double.parseDouble(parts[2].trim());
             int sold = Integer.parseInt(parts[3].trim());
-            int durationMin = Integer.parseInt(parts[4].trim());
+            int durationMin =
+                    Integer.parseInt(parts[4].trim());
 
             if (hall == 1) {
                 return new PremiumScreening(
-                        film,
-                        hall,
-                        ticketPrice,
-                        sold,
-                        durationMin
+                        film, hall, ticketPrice, sold, durationMin
                 );
             }
 
             return new RegularScreening(
-                    film,
-                    hall,
-                    ticketPrice,
-                    sold,
-                    durationMin
+                    film, hall, ticketPrice, sold, durationMin
             );
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(
@@ -184,77 +163,71 @@ public abstract sealed class Screening
     }
 
     /**
-     * Обчислює виторг конкретного типу сеансу.
+     * Обчислює виторг сеансу.
      *
-     * @return виторг сеансу
+     * @return виторг
      */
     public abstract double revenue();
 
     /**
      * Повертає категорію сеансу.
      *
-     * @return категорія сеансу
+     * @return категорія
      */
     public abstract ScreeningKind getKind();
 
     /**
-     * Порівнює специфічний стан конкретного підтипу.
+     * Порівнює специфічний стан підтипу.
      *
-     * @param other інший об'єкт того самого конкретного підтипу
-     * @return {@code true}, якщо специфічний стан збігається
+     * @param other інший сеанс
+     * @return результат порівняння
      */
-    protected abstract boolean hasSameSubtypeState(Screening other);
+    protected abstract boolean hasSameSubtypeState(
+            Screening other
+    );
 
     /**
-     * Повертає складову хеш-коду, специфічну для підтипу.
+     * Повертає специфічну складову хеш-коду.
      *
-     * @return специфічна складова хеш-коду
+     * @return складова хеш-коду
      */
     protected abstract Object subtypeHashComponent();
 
-    /**
-     * @return назва фільму
-     */
+    /** @return назва фільму */
     public String getFilm() {
         return film;
     }
 
-    /**
-     * @return номер залу
-     */
+    /** @return номер залу */
     public int getHall() {
         return hall;
     }
 
-    /**
-     * @return ціна квитка
-     */
+    /** @return ціна квитка */
     public double getTicketPrice() {
         return ticketPrice;
     }
 
-    /**
-     * @return кількість проданих квитків
-     */
+    /** @return кількість проданих квитків */
     public int getSold() {
         return sold;
     }
 
-    /**
-     * @return тривалість фільму у хвилинах
-     */
+    /** @return тривалість фільму */
     public int getDurationMin() {
         return durationMin;
     }
 
+    /** @return час початку сеансу */
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
     /**
-     * Порівнює два сеанси за спільним та специфічним станом.
-     *
-     * <p>Об'єкти різних конкретних підтипів не вважаються рівними,
-     * навіть якщо значення їхніх спільних полів збігаються.</p>
+     * Порівнює два сеанси за всіма значущими полями.
      *
      * @param object об'єкт для порівняння
-     * @return {@code true}, якщо об'єкти логічно рівні
+     * @return true, якщо об'єкти рівні
      */
     @Override
     public final boolean equals(Object object) {
@@ -262,24 +235,28 @@ public abstract sealed class Screening
             return true;
         }
 
-        if (object == null || getClass() != object.getClass()) {
+        if (object == null
+                || getClass() != object.getClass()) {
             return false;
         }
 
         Screening other = (Screening) object;
 
         return hall == other.hall
-                && Double.compare(ticketPrice, other.ticketPrice) == 0
+                && Double.compare(
+                        ticketPrice, other.ticketPrice
+                ) == 0
                 && sold == other.sold
                 && durationMin == other.durationMin
                 && film.equals(other.film)
+                && startTime.equals(other.startTime)
                 && hasSameSubtypeState(other);
     }
 
     /**
-     * Повертає хеш-код, узгоджений з {@link #equals(Object)}.
+     * Повертає хеш-код сеансу.
      *
-     * @return хеш-код сеансу
+     * @return хеш-код
      */
     @Override
     public final int hashCode() {
@@ -290,43 +267,28 @@ public abstract sealed class Screening
                 ticketPrice,
                 sold,
                 durationMin,
+                startTime,
                 subtypeHashComponent()
         );
     }
 
     /**
-     * Повертає текстове представлення спільної частини сеансу.
+     * Повертає текстове представлення сеансу.
      *
-     * @return текстове представлення об'єкта
+     * @return текстове представлення
      */
     @Override
     public String toString() {
         return String.format(
                 Locale.ROOT,
-                "%s{film='%s', hall=%d, ticketPrice=%.2f, sold=%d, durationMin=%d}",
+                "%s{film='%s', hall=%d, ticketPrice=%.2f, sold=%d, durationMin=%d, startTime=%s}",
                 getClass().getSimpleName(),
                 film,
                 hall,
                 ticketPrice,
                 sold,
-                durationMin
+                durationMin,
+                startTime
         );
-    }
-    /**
-     * Внутрішнє незмінне представлення вже перевірених даних.
-     *
-     * @param film назва фільму
-     * @param hall номер залу
-     * @param ticketPrice ціна квитка
-     * @param sold кількість проданих квитків
-     * @param durationMin тривалість фільму у хвилинах
-     */
-    private record ValidatedData(
-            String film,
-            int hall,
-            double ticketPrice,
-            int sold,
-            int durationMin
-    ) {
     }
 }

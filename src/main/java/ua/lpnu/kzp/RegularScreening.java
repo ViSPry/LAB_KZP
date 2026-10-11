@@ -1,22 +1,24 @@
+
 package ua.lpnu.kzp;
+
+import java.time.LocalTime;
 
 /**
  * Представляє звичайний сеанс кінотеатру.
  *
- * <p>Виторг звичайного сеансу визначається як добуток
- * ціни квитка на кількість проданих квитків.</p>
+ * <p>Виторг дорівнює добутку ціни квитка
+ * на кількість проданих квитків.</p>
  */
 public final class RegularScreening extends Screening {
 
     /**
-     * Створює звичайний сеанс.
+     * Створює звичайний сеанс без явно заданого часу.
      *
      * @param film назва фільму
      * @param hall номер залу
      * @param ticketPrice ціна квитка
      * @param sold кількість проданих квитків
-     * @param durationMin тривалість фільму у хвилинах
-     * @throws IllegalArgumentException якщо дані не проходять валідацію
+     * @param durationMin тривалість фільму
      */
     public RegularScreening(
             String film,
@@ -25,19 +27,58 @@ public final class RegularScreening extends Screening {
             int sold,
             int durationMin
     ) {
+        this(
+                film,
+                hall,
+                ticketPrice,
+                sold,
+                durationMin,
+                LocalTime.MIDNIGHT
+        );
+    }
+
+    /**
+     * Створює звичайний сеанс із часом початку.
+     *
+     * @param film назва фільму
+     * @param hall номер залу
+     * @param ticketPrice ціна квитка
+     * @param sold кількість проданих квитків
+     * @param durationMin тривалість фільму
+     * @param startTime час початку сеансу
+     * @throws IllegalArgumentException якщо дані некоректні
+     */
+    public RegularScreening(
+            String film,
+            int hall,
+            double ticketPrice,
+            int sold,
+            int durationMin,
+            LocalTime startTime
+    ) {
         super(
                 film,
                 hall,
                 ticketPrice,
                 sold,
-                durationMin
+                durationMin,
+                startTime
+        );
+
+        validateCommon(
+                film,
+                hall,
+                ticketPrice,
+                sold,
+                durationMin,
+                startTime
         );
     }
 
     /**
      * Обчислює виторг звичайного сеансу.
      *
-     * @return добуток ціни квитка на кількість проданих квитків
+     * @return виторг
      */
     @Override
     public double revenue() {
@@ -45,9 +86,9 @@ public final class RegularScreening extends Screening {
     }
 
     /**
-     * Повертає категорію сеансу.
+     * Повертає категорію звичайного сеансу.
      *
-     * @return {@link ScreeningKind#REGULAR}
+     * @return REGULAR
      */
     @Override
     public ScreeningKind getKind() {
@@ -55,10 +96,10 @@ public final class RegularScreening extends Screening {
     }
 
     /**
-     * Звичайний сеанс не має додаткового стану підтипу.
+     * Звичайний сеанс не має додаткового стану.
      *
-     * @param other інший звичайний сеанс
-     * @return завжди {@code true}
+     * @param other інший сеанс
+     * @return завжди true
      */
     @Override
     protected boolean hasSameSubtypeState(Screening other) {
@@ -68,7 +109,7 @@ public final class RegularScreening extends Screening {
     /**
      * Звичайний сеанс не має додаткової складової хеш-коду.
      *
-     * @return {@code null}
+     * @return null
      */
     @Override
     protected Object subtypeHashComponent() {
