@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -17,7 +18,8 @@ import java.util.Map;
  *
  * <p>Програма зчитує CSV-файл, створює об'єкти сеансів,
  * обчислює показники продажів і формує текстовий звіт.
- * Додатковий режим --streams демонструє запити Stream API.</p>
+ * Основні обчислення виконуються через Stream API.
+ * Додатковий режим --streams показує розширені запити.</p>
  */
 public class Main {
 
@@ -85,40 +87,39 @@ public class Main {
         List<String> report = new ArrayList<>();
         List<Screening> screenings = new ArrayList<>();
 
-        int invalidCount = 0;
-
         try {
             List<String> lines = Files.readAllLines(
                     inputPath,
                     StandardCharsets.UTF_8
             );
 
-            for (int i = 0; i < lines.size(); i++) {
-                String line = lines.get(i);
-                int lineNumber = i + 1;
-
-                try {
-                    Screening screening = Screening.fromCsv(line);
-                    screenings.add(screening);
-
-                    System.out.println(
-                            "Рядок %d: OK — %s (%s)"
-                                    .formatted(
+            // Послідовний IntStream зберігає номери та порядок CSV-рядків.
+            long invalidCountLong = IntStream.range(0, lines.size())
+                    .mapToObj(index -> {
+                        String line = lines.get(index);
+                        int lineNumber = index + 1;
+                        try {
+                            Screening screening = Screening.fromCsv(line);
+                            screenings.add(screening);
+                            System.out.println(
+                                    "Рядок %d: OK — %s (%s)".formatted(
                                             lineNumber,
                                             screening.getFilm(),
                                             describeScreening(screening)
                                     )
-                    );
-
-                } catch (IllegalArgumentException e) {
-                    invalidCount++;
-
-                    System.out.println(
-                            "Рядок %d: ПОМИЛКА — %s"
-                                    .formatted(lineNumber, e.getMessage())
-                    );
-                }
-            }
+                            );
+                            return false;
+                        } catch (IllegalArgumentException e) {
+                            System.out.println(
+                                    "Рядок %d: ПОМИЛКА — %s"
+                                            .formatted(lineNumber, e.getMessage())
+                            );
+                            return true;
+                        }
+                    })
+                    .filter(invalid -> invalid)
+                    .count();
+            int invalidCount = Math.toIntExact(invalidCountLong);
 
             TicketSales ticketSales = calculateTicketSales(
                     screenings,
@@ -154,9 +155,7 @@ public class Main {
 
             System.out.println();
 
-            for (String reportLine : report) {
-                System.out.println(reportLine);
-            }
+            report.stream().forEachOrdered(System.out::println);
 
             Path parent = outputPath.toAbsolutePath().getParent();
 
@@ -277,19 +276,17 @@ public class Main {
         List<Screening> top =
                 ScreeningQueries.topBySoldAndTime(screenings, 5);
 
-        for (int i = 0; i < top.size(); i++) {
+        IntStream.range(0, top.size()).forEachOrdered(i -> {
             Screening screening = top.get(i);
-
             System.out.println(
-                    "   %d. %s — %d квитків, %s"
-                            .formatted(
-                                    i + 1,
-                                    screening.getFilm(),
-                                    screening.getSold(),
-                                    screening.getStartTime()
-                            )
+                    "   %d. %s — %d квитків, %s".formatted(
+                            i + 1,
+                            screening.getFilm(),
+                            screening.getSold(),
+                            screening.getStartTime()
+                    )
             );
-        }
+        });
 
         System.out.println();
         System.out.println(
@@ -411,21 +408,21 @@ public class Main {
             List<Screening> screenings,
             int invalidCount
     ) {
-        double totalRevenue = 0;
-        double totalTicketPrice = 0;
-        int maxSold = 0;
+        double totalRevenue = screenings.stream()
+                .mapToDouble(Screening::revenue)
+                .sum();
 
-        for (Screening screening : screenings) {
-            totalRevenue += screening.revenue();
-            totalTicketPrice += screening.getTicketPrice();
-            maxSold = Math.max(maxSold, screening.getSold());
-        }
+        double averageTicketPrice = screenings.stream()
+                .mapToDouble(Screening::getTicketPrice)
+                .average()
+                .orElse(0.0);
+
+        int maxSold = screenings.stream()
+                .mapToInt(Screening::getSold)
+                .max()
+                .orElse(0);
 
         int validCount = screenings.size();
-
-        double averageTicketPrice = validCount > 0
-                ? totalTicketPrice / validCount
-                : 0;
 
         return new TicketSales(
                 validCount,
