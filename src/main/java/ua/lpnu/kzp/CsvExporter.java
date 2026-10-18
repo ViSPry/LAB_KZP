@@ -40,7 +40,7 @@ public final class CsvExporter {
         Objects.requireNonNull(type, "Type must not be null");
         Objects.requireNonNull(records, "Records must not be null");
 
-        List<Field> fields = findAnnotatedFields(type);
+        List<Field> fields = ReflectionFieldCache.fieldsFor(type);
 
         if (fields.isEmpty()) {
             throw new DataStorageException(
@@ -90,32 +90,7 @@ public final class CsvExporter {
         }
     }
 
-    private static List<Field> findAnnotatedFields(Class<?> type) {
-        List<Field> fields = new ArrayList<>();
 
-        for (Class<?> current = type;
-             current != null && current != Object.class;
-             current = current.getSuperclass()) {
-
-            for (Field field : current.getDeclaredFields()) {
-                if (field.isAnnotationPresent(CsvColumn.class)) {
-                    try {
-                        field.setAccessible(true);
-                    } catch (InaccessibleObjectException
-                             | SecurityException exception) {
-                        throw new DataStorageException(
-                                "Cannot access CSV field: "
-                                        + field.getName(), exception);
-                    }
-
-                    fields.add(field);
-                }
-            }
-        }
-
-        fields.sort(Comparator.comparing(Field::getName));
-        return fields;
-    }
 
     private static String formatValue(Object value) {
         if (value == null) {

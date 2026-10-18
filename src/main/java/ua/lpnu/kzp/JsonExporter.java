@@ -30,7 +30,7 @@ public final class JsonExporter<T> implements Exporter<T> {
         Objects.requireNonNull(path, "Path must not be null");
         Objects.requireNonNull(records, "Records must not be null");
 
-        List<Field> fields = annotatedFields(type);
+        List<Field> fields = ReflectionFieldCache.fieldsFor(type);
 
         if (fields.isEmpty()) {
             throw new DataStorageException(
@@ -114,24 +114,7 @@ public final class JsonExporter<T> implements Exporter<T> {
         }
         return field.get(record);
     }
-    private static List<Field> annotatedFields(Class<?> type) {
-        List<Field> fields = new ArrayList<>();
 
-        for (Class<?> current = type;
-                current != null && current != Object.class;
-                current = current.getSuperclass()) {
-
-            for (Field field : current.getDeclaredFields()) {
-                if (!Modifier.isStatic(field.getModifiers())
-                        && field.isAnnotationPresent(CsvColumn.class)) {
-                    fields.add(field);
-                }
-            }
-        }
-
-        fields.sort(Comparator.comparing(Field::getName));
-        return List.copyOf(fields);
-    }
 
     private static String formatValue(Object value) {
         if (value == null) {
