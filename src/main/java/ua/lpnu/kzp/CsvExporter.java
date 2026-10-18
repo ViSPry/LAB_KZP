@@ -19,6 +19,15 @@ import java.util.stream.Collectors;
  */
 public final class CsvExporter {
 
+    /**
+     * Creates a CSV exporter compatible with the common Exporter interface.
+     */
+    public static <T> Exporter<T> forType(Class<T> type) {
+        java.util.Objects.requireNonNull(type, "Type must not be null");
+        return (path, records) -> write(path, type, records);
+    }
+
+
     private CsvExporter() {
     }
 
