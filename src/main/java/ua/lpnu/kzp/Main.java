@@ -85,41 +85,27 @@ public class Main {
         }
 
         List<String> report = new ArrayList<>();
-        List<Screening> screenings = new ArrayList<>();
-
         try {
-            List<String> lines = Files.readAllLines(
-                    inputPath,
-                    StandardCharsets.UTF_8
-            );
+            List<String> lines = Files.readAllLines(inputPath, StandardCharsets.UTF_8);
 
-            // Послідовний IntStream зберігає номери та порядок CSV-рядків.
-            long invalidCountLong = IntStream.range(0, lines.size())
-                    .mapToObj(index -> {
-                        String line = lines.get(index);
-                        int lineNumber = index + 1;
-                        try {
-                            Screening screening = Screening.fromCsv(line);
-                            screenings.add(screening);
-                            System.out.println(
-                                    "Рядок %d: OK — %s (%s)".formatted(
-                                            lineNumber,
-                                            screening.getFilm(),
-                                            describeScreening(screening)
-                                    )
-                            );
-                            return false;
-                        } catch (IllegalArgumentException e) {
-                            System.out.println(
-                                    "Рядок %d: ПОМИЛКА — %s"
-                                            .formatted(lineNumber, e.getMessage())
-                            );
-                            return true;
-                        }
-                    })
-                    .filter(invalid -> invalid)
-                    .count();
-            int invalidCount = Math.toIntExact(invalidCountLong);
+            // Проміжна операція не змінює зовнішнього стану.
+            List<CsvParseResult> parsed = IntStream.range(0, lines.size())
+                    .mapToObj(i -> parseCsvLine(i + 1, lines.get(i)))
+                    .toList();
+
+            // Побічна дія (друк) виконується лише в кінцевій операції.
+            parsed.stream()
+                    .map(Main::formatCsvResult)
+                    .forEachOrdered(System.out::println);
+
+            List<Screening> screenings = parsed.stream()
+                    .filter(CsvParseResult::isValid)
+                    .map(CsvParseResult::screening)
+                    .toList();
+
+            int invalidCount = Math.toIntExact(parsed.stream()
+                    .filter(result -> !result.isValid())
+                    .count());
 
             TicketSales ticketSales = calculateTicketSales(
                     screenings,
@@ -190,6 +176,30 @@ public class Main {
      * <p>Демонстраційні дані не впливають на CSV-звіт.
      * Старий формат CSV не містить часу початку сеансу.</p>
      */
+    private record CsvParseResult(int lineNumber, Screening screening, String errorMessage) {
+        boolean isValid() {
+            return screening != null;
+        }
+    }
+
+    private static CsvParseResult parseCsvLine(int lineNumber, String line) {
+        try {
+            return new CsvParseResult(lineNumber, Screening.fromCsv(line), null);
+        } catch (IllegalArgumentException e) {
+            return new CsvParseResult(lineNumber, null, e.getMessage());
+        }
+    }
+
+    private static String formatCsvResult(CsvParseResult result) {
+        if (result.isValid()) {
+            Screening screening = result.screening();
+            return "Рядок %d: OK — %s (%s)".formatted(
+                    result.lineNumber(), screening.getFilm(), describeScreening(screening));
+        }
+        return "Рядок %d: ПОМИЛКА — %s".formatted(
+                result.lineNumber(), result.errorMessage());
+    }
+
     private static void printStreamDemonstration() {
         List<Screening> screenings = demonstrationScreenings();
 
@@ -387,7 +397,9 @@ public class Main {
                     regular.getKind().getLabel();
 
             case PremiumScreening premium ->
-                    "%s, доплата %.2f грн".formatted(
+                    String.format(
+                            Locale.ROOT,
+                            "%s, доплата %.2f грн",
                             premium.getKind().getLabel(),
                             premium.getPremiumFee()
                     );
