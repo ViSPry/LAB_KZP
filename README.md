@@ -4,7 +4,7 @@
 
 - **Варіант:** 19 — «Кінотеатр»
 - **Поточний етап:** лабораторна робота №5 — параметризоване сховище, винятки та CSV-експорт
-- **Версія Maven-проєкту:** `4.0.0`
+- **Версія Maven-проєкту:** `5.0.0`
 - **Мова:** Java 21
 - **Збірка:** Maven Wrapper
 - **Перевірки:** JUnit 5, SpotBugs, GitHub Actions
@@ -118,56 +118,60 @@
 ./mvnw clean verify
 ```
 
-Виконуваний JAR після збірки: `target/lab01-4.0.0.jar`. Назва `lab01` — незмінний Maven `artifactId` проєкту.
+Виконуваний JAR після збірки: `target/lab01-5.0.0.jar`. Назва `lab01` — незмінний Maven `artifactId` проєкту.
 
 ```powershell
 # Стандартний запуск: data/input.csv -> out/report.txt
-java -jar .\target\lab01-4.0.0.jar
+java -jar .\target\lab01-5.0.0.jar
 
 # Власні шляхи
-java -jar .\target\lab01-4.0.0.jar --input data/input.csv --output out/report.txt
+java -jar .\target\lab01-5.0.0.jar --input data/input.csv --output out/report.txt
 
 # Демонстрація Stream API
-java -jar .\target\lab01-4.0.0.jar --streams
+java -jar .\target\lab01-5.0.0.jar --streams
 
 # Довідка і версія
-java -jar .\target\lab01-4.0.0.jar --help
-java -jar .\target\lab01-4.0.0.jar --version
+java -jar .\target\lab01-5.0.0.jar --help
+java -jar .\target\lab01-5.0.0.jar --version
 ```
 
-Очікувана відповідь на `--version`: `lab01 version 4.0.0`.
+Очікувана відповідь на `--version`: `lab01 version 5.0.0`.
+**Версіонування:** єдиним джерелом версії застосунку є `pom.xml`.
+Під час Maven-збірки версія автоматично записується до JAR-маніфесту
+як `Implementation-Version`. Параметри `--version` і `--help`
+отримують її програмно, без жорстко заданих номерів версій у Java-коді.
 
 
 ## Тестування і статичний аналіз
 
-JUnit 5 перевіряє старі сценарії та нові Stream-запити.
+Для перевірки лабораторних робіт №1–5 використовується JUnit 5.
 
-| Клас тестів | Кількість |
-|---|---:|
-| `MainTest` | 9 |
-| `ScreeningHierarchyTest` | 11 |
-| `ScreeningQueriesTest` | 18 |
-| `ScreeningTest` | 13 |
-| `TicketSalesTest` | 7 |
-| **Разом** | **58** |
+**Результат перевірки:** 122 тести, 0 помилок, 0 пропущених тестів.
 
-Фактичний результат тестів: `Tests run: 58, Failures: 0, Errors: 0, Skipped: 0`.
+Тести перевіряють CSV-обробку, предметну модель кінотеатру, поліморфізм, Stream API, Generic Repository, CSV/JSON-експорт, імпорт і Reflection.
 
-Перевіряються порогові значення, порожні колекції, повторення, граничні значення `n`, порядок сортування за двома ключами, `Optional`, поліморфний виторг, незмінність вхідного списку та дворівневе групування.
+SpotBugs запускається автоматично під час Maven-фази `verify`. Результат останньої перевірки: 0 дефектів.
 
-SpotBugs (`4.8.6.6`) запускається автоматично на фазі Maven `verify`, з параметрами `effort=Max` і `threshold=Low`. Попередження `CT_CONSTRUCTOR_THROW` виправлялося зміною реалізації конструкторів, а не приглушенням через `@SuppressFBWarnings`. Для перевірки повного результату використовуйте `clean verify`, а не лише `test`.
+Для повної перевірки виконайте команду `.\mvnw.cmd clean verify`.
 
 ## GitHub і CI
 
-- Репозиторій: https://github.com/ViSPry/LAB_KZP
-- Робоча гілка ЛР №4: `lab04`.
-- GitHub Issues: `#18` — модель часу; `#19` — Stream API; `#20` — тести; `#21` — документація; `#22` — CI та реліз.
-- Запланований Pull Request: `lab04` → `main`, із прив'язкою `Closes #18` … `Closes #22`.
-- Workflow GitHub Actions призначений для перевірок на Ubuntu, Windows та macOS і публікації JAR artifact. **Результат CI для ЛР №4 потрібно підтвердити після push/PR.**
-- Фінальний тег `v4.0.0` створюється **після** завершення та об'єднання змін; до цього він не вважається випущеним.
+Репозиторій: https://github.com/ViSPry/LAB_KZP
 
-Попередній етап ЛР №3 завершено Pull Request [#17](https://github.com/ViSPry/LAB_KZP/pull/17) і тегом `v3.0.0`.
+Проєкт охоплює лабораторні роботи №1–5. Поточна версія: `5.0.0`.
 
+Історія розвитку:
+- ЛР №3 — PR #17, версія `3.0.0`.
+- ЛР №4 — Stream API, версія `4.0.0`.
+- ЛР №5 — Generic Repository, CSV/JSON, Reflection, версія `5.0.0`.
+
+Виправлення версіонування виконано в [PR #37](https://github.com/ViSPry/LAB_KZP/pull/37).
+
+Єдиним джерелом версії застосунку є `pom.xml`. Maven записує версію до JAR-маніфесту як `Implementation-Version`, а параметри `--version` і `--help` отримують її автоматично.
+
+GitHub Actions перевіряє проєкт на Ubuntu, Windows і macOS. Для PR #37 усі 6 перевірок завершилися успішно.
+
+---
 ## Документація й академічна доброчесність
 
 Детальний опис реалізації, результати перевірок, порівняння циклів зі Stream API, контрольні питання та висновки наведено в `REPORT.md`.
@@ -242,3 +246,14 @@ CSV-експортер підтримує екранування ком, под�
 .\mvnw.cmd test-compile
 java -cp "target\classes;target\test-classes" ua.lpnu.kzp.ReflectionBenchmark
 ```
+## 18. Автоматичне версіонування Maven
+
+Єдиним джерелом версії застосунку є файл `pom.xml`. Поточна версія проєкту — `5.0.0`.
+
+Під час збирання Maven автоматично записує версію до JAR-маніфесту в поле `Implementation-Version`.
+
+Клас `Main` отримує цю версію через метод `getImplementationVersion()`. Тому параметри `--version` і `--help` використовують актуальну версію без жорстко заданих значень у Java-коді.
+
+Виправлення виконано в [Pull Request #37](https://github.com/ViSPry/LAB_KZP/pull/37).
+
+Усі 6 перевірок GitHub Actions для PR #37 успішно завершилися на Ubuntu, Windows і macOS.
