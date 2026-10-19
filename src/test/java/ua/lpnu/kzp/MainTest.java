@@ -32,7 +32,7 @@ class MainTest {
             Main.main(new String[]{"--version"});
 
             assertEquals(
-                    "lab01 version 4.0.0",
+                    "lab01 version development",
                     output.toString(StandardCharsets.UTF_8).trim()
             );
         } finally {
@@ -59,7 +59,7 @@ class MainTest {
             assertTrue(result.contains("--streams"));
             assertTrue(result.contains("--input"));
             assertTrue(result.contains("--output"));
-            assertTrue(result.contains("lab01-4.0.0.jar"));
+            assertTrue(result.contains("lab01-"));
         } finally {
             System.setOut(originalOut);
         }

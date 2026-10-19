@@ -23,7 +23,11 @@ import java.util.Map;
  */
 public class Main {
 
-    private static final String VERSION = "4.0.0";
+    private static String getVersion() {
+        Package appPackage = Main.class.getPackage();
+        String version = appPackage.getImplementationVersion();
+        return version != null ? version : "development";
+    }
 
     private Main() {
     }
@@ -44,7 +48,7 @@ public class Main {
                     return;
 
                 case "--version":
-                    System.out.println("lab01 version " + VERSION);
+                    System.out.println("lab01 version " + getVersion());
                     return;
 
                 case "--streams":
@@ -450,7 +454,7 @@ public class Main {
      */
     private static void printHelp() {
         System.out.println(
-                "Використання: java -jar lab01-4.0.0.jar [параметри]"
+                "Використання: java -jar lab01-" + getVersion() + ".jar [параметри]"
         );
         System.out.println();
         System.out.println("Параметри:");
