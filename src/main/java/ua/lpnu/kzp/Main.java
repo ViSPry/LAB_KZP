@@ -51,6 +51,10 @@ public class Main {
                     System.out.println("lab01 version " + getVersion());
                     return;
 
+                case "--storage":
+                    new StorageController().run();
+                    return;
+
                 case "--streams":
                     printStreamDemonstration();
                     return;
