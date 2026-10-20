@@ -20,6 +20,36 @@
 | ЛР №4 | Stream API, статистика, сортування, `Optional`, дворівневе групування | `4.0.0` |
 | ЛР №5 | Generic Repository, @CsvColumn, CSV-імпорт/експорт, JSON, Reflection Cache, успадкування полів | `5.0.0` |
 
+## Архітектура проєкту після рефакторингу
+
+Після виконання лабораторних робіт №1–5 проведено рефакторинг структури застосунку в [Pull Request #40](https://github.com/ViSPry/LAB_KZP/pull/40).
+
+Раніше `Main.java` містив обробку аргументів, читання CSV, формування звіту та демонстрацію Stream API. Для покращення супроводжуваності ці функції розділено між окремими класами.
+
+| Клас | Призначення |
+|---|---|
+| `Main` | Мінімальна точка входу до програми |
+| `CinemaController` | Координація режимів запуску |
+| `CommandLineParser` | Розбір аргументів командного рядка |
+| `CinemaCsvParser` | Перевірка та розбір CSV-записів |
+| `CinemaReportService` | Читання CSV і формування звіту |
+| `TicketSalesService` | Обчислення статистики продажів |
+| `StreamDemoService` | Демонстрація операцій Stream API |
+| `ScreeningQueries` | Запити до колекції кіносеансів |
+| `StorageController` | Інтерактивне меню сховища ЛР №5 |
+| `StorageService` | Операції зі сховищем, імпортом та експортом |
+
+### Взаємодія компонентів
+
+Програма запускається через `Main`, який передає аргументи класу `CinemaController`. Контролер використовує `CommandLineParser` для визначення режиму роботи.
+
+Для формування звіту викликається `CinemaReportService`, який використовує `CinemaCsvParser` і `TicketSalesService`.
+
+Режим `--streams` обслуговує `StreamDemoService`, що використовує `ScreeningQueries`. Режим `--storage` запускає `StorageController`, який взаємодіє зі `StorageService`.
+
+Рефакторинг зберіг усі режими запуску: `--help`, `--version`, `--streams`, `--storage`, `--input` та `--output`.
+
+Після змін команда `mvnw.cmd clean verify` завершилася успішно. Усі шість перевірок GitHub Actions для PR #40 також пройдено.
 ## Предметна модель
 
 `Screening` — абстрактний `sealed`-клас, який дозволяє лише два `final`-підтипи:
@@ -252,7 +282,7 @@ java -cp "target\classes;target\test-classes" ua.lpnu.kzp.ReflectionBenchmark
 
 Під час збирання Maven автоматично записує версію до JAR-маніфесту в поле `Implementation-Version`.
 
-Клас `Main` отримує цю версію через метод `getImplementationVersion()`. Тому параметри `--version` і `--help` використовують актуальну версію без жорстко заданих значень у Java-коді.
+Клас `CinemaController` отримує цю версію через метод `getImplementationVersion()`. Тому параметри `--version` і `--help` використовують актуальну версію без жорстко заданих значень у Java-коді.
 
 Виправлення виконано в [Pull Request #37](https://github.com/ViSPry/LAB_KZP/pull/37).
 
