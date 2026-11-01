@@ -1,0 +1,45 @@
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kzp-lab06-cinema"
+version = "0.1.0"
+description = "Laboratory Work 6: Cinema data processing with Python"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "KZP Laboratory Project" }
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.9",
+    "build>=1.2"
+]
+
+[project.scripts]
+kzp-cinema = "kzp_lab06.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v"
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
