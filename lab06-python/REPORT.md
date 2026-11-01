@@ -186,20 +186,13 @@ int(value)
 Для відбору сеансів застосовано list comprehension:
 
 ```python
-selected = [
-    screening
-    for screening in screenings
-    if screening.sold > threshold
-]
+selected = [screening for screening in screenings if screening.sold > threshold]
 ```
 
 Для визначення унікальних фільмів використано set comprehension:
 
 ```python
-unique_films = {
-    screening.film
-    for screening in selected
-}
+unique_films = {screening.film for screening in selected}
 ```
 
 Таким чином, реалізовано щонайменше два різновиди comprehension.
