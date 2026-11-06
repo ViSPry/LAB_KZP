@@ -3,13 +3,19 @@ name: Lab 06 Python CI
 
 on:
   push:
+    branches:
+      - main-python
     paths:
       - "lab06-python/**"
       - ".github/workflows/lab06-python-ci.yml"
+
   pull_request:
+    branches:
+      - main-python
     paths:
       - "lab06-python/**"
       - ".github/workflows/lab06-python-ci.yml"
+
   workflow_dispatch:
 
 jobs:

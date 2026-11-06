@@ -1,10 +1,10 @@
-# Лабораторна робота №6 — Python: аналіз продажів квитків кінотеатру
+﻿# Лабораторна робота №6 — Python: аналіз продажів квитків кінотеатру
 
 **Дисципліна:** Кросплатформні хасоби програмування (КЗП)  
 **Варіант:** 19  
 **Мова програмування:** Python 3.11+  
 **Репозиторій:** https://github.com/ViSPry/LAB_KZP  
-**Робоча гілка:** `lab06`
+**Основна гілка Python:** `main-python`
 
 ## Опис проєкту
 
@@ -146,13 +146,13 @@ python -m pip install -e ".[dev]"
 Приклад запуску з CSV, експортованим Java-застосунком:
 
 ```powershell
-python -m kzp_lab06.cli --input ../out/storage-export.csv --output reports/cinema-report.txt --threshold 50
+python -m kzp_lab06.cli --input data/input.csv --output reports/cinema-report.txt --threshold 50
 ```
 
 Альтернативний запуск через встановлену консольну команду:
 
 ```powershell
-kzp-cinema --input ../out/storage-export.csv --output reports/cli-report.txt --threshold 50
+kzp-cinema --input data/input.csv --output reports/cli-report.txt --threshold 50
 ```
 
 Перегляд довідки:
@@ -279,14 +279,14 @@ python -m build
 
 ```text
 dist/
-├── kzp_lab06_cinema-0.1.0-py3-none-any.whl
-└── kzp_lab06_cinema-0.1.0.tar.gz
+├── kzp_lab06_cinema-6.0.0.1-py3-none-any.whl
+└── kzp_lab06_cinema-6.0.0.1.tar.gz
 ```
 
 Встановлення wheel:
 
 ```powershell
-python -m pip install --force-reinstall --no-deps .\dist\kzp_lab06_cinema-0.1.0-py3-none-any.whl
+python -m pip install --force-reinstall --no-deps .\dist\kzp_lab06_cinema-6.0.0.1-py3-none-any.whl
 ```
 
 Перевірка встановлення:
