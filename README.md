@@ -29,8 +29,7 @@
 \| ЛР №4 | Stream API, статистика, сортування, `Optional`, дворівневе групування | `4.0.0` |
 
 \| ЛР №5 | Generic Repository, @CsvColumn, CSV-імпорт/експорт, JSON, Reflection Cache, успадкування полів | `5.0.0` |
-| ЛР №6 | Python: CSV-аналіз, pytest, Ruff, wheel, GitHub Actions, потокове читання | `0.1.0` (Python-пакет) |
-
+| ЛР №6 | Python: CSV-аналіз, pytest, Ruff, wheel, GitHub Actions, потокове читання | `6.0.0.1` (Python-пакет) |
 ## Предметна модель
 `Screening` — абстрактний `sealed`-клас, який дозволяє лише два `final`-підтипи:
 
@@ -200,7 +199,7 @@ SpotBugs запускається автоматично під час Maven-ф�
 ## GitHub і CI
 Репозиторій: https://github.com/ViSPry/LAB_KZP
 
-Проєкт охоплює лабораторні роботи №1–6. Версія Java/Maven-проєкту — `5.0.0`; Python-пакета — `0.1.0`.
+Репозиторій містить історію лабораторних робіт №1–6. Для розділення технологій використовуються дві основні гілки: `main` — Java (ЛР №1–5), `main-python` — Python (ЛР №6). Версія Java/Maven-проєкту — `5.0.0`, Python-пакета — `6.0.0.1`.
 
 Історія розвитку:
 
@@ -328,7 +327,7 @@ java -cp "target\classes;target\test-classes" ua.lpnu.kzp.ReflectionBenchmark
 
 **Варіант:** 19 — «Кінотеатр».  
 **Мова:** Python 3.11+ (локально використовувався Python 3.15.2).  
-**Версія Python-пакета:** `0.1.0`.  
+**Версія Python-пакета:** `6.0.0.1`.
 **Каталог:** [`lab06-python/`](lab06-python/).  
 **Документація:** [`lab06-python/README.md`](lab06-python/README.md).  
 **Повний звіт і 20 контрольних запитань:** [`lab06-python/REPORT.md`](lab06-python/REPORT.md).
@@ -374,16 +373,16 @@ python -m venv .venv
 python -m pip install -e ".[dev]"
 ```
 
-Запуск із CSV-експортом Java (попередньо потрібно створити `out/storage-export.csv` засобами Java-проєкту):
+Запуск із демонстраційним CSV-файлом lab06-python/data/input.csv:
 
 ```powershell
-kzp-cinema --input ../out/storage-export.csv --output reports/cinema-report.txt --threshold 50
+kzp-cinema --input data/input.csv --output reports/cinema-report.txt --threshold 50
 ```
 
 Альтернативно:
 
 ```powershell
-python -m kzp_lab06.cli --input ../out/storage-export.csv --output reports/cinema-report.txt --threshold 50
+python -m kzp_lab06.cli --input data/input.csv --output reports/cinema-report.txt --threshold 50
 ```
 
 Перевірка довідки:
@@ -401,11 +400,11 @@ python -m ruff format --check .
 python -m build
 ```
 
-**Результати перевірки:** 26 тестів pytest пройдено, Ruff lint/format пройдено, wheel-пакет `kzp_lab06_cinema-0.1.0-py3-none-any.whl` успішно зібрано та встановлено.
+**Результати локальної перевірки:** 30 тестів pytest успішно пройдено; Ruff lint — без помилок; Ruff format — 19 файлів відповідають правилам форматування. Успішно створено wheel-пакет `kzp_lab06_cinema-6.0.0.1-py3-none-any.whl` та вихідний архів `kzp_lab06_cinema-6.0.0.1.tar.gz`.
 
 ### GitHub Actions
 
-Python має окремий workflow [`lab06-python-ci.yml`](.github/workflows/lab06-python-ci.yml), тоді як Java продовжує використовувати [`ci.yml`](.github/workflows/ci.yml).
+Для лабораторної №6 налаштовано окремий Python workflow [`lab06-python-ci.yml`](.github/workflows/lab06-python-ci.yml), орієнтований на гілку `main-python`. Java workflow `ci.yml` залишається у гілці `main` для лабораторних №1–5.
 
 Python CI запускає pytest, Ruff, створення та встановлення wheel, перевірку CLI на **Ubuntu, Windows і macOS**, а також публікує зібрані дистрибутиви як artifact. Усі три ОС пройшли перевірки. Під час налагодження Windows CI було виправлено виведення українського тексту через `PYTHONIOENCODING=utf-8`.
 
@@ -422,7 +421,7 @@ Python CI запускає pytest, Ruff, створення та встанов�
 
 ### GitHub Issues та Pull Request
 
-Для ЛР №6 створено Issues **#42–#48**, які охоплюють структуру пакета, CSV, аналітику, CLI і тести, CI, потокове читання та документацію. Розробка ведеться у гілці `lab06`; створено Pull Request до `main`. Остаточне злиття виконується після завершення документації та перевірок.
+Для ЛР №6 створено Issues **#42–#48**. Початкову реалізацію виконано в гілці `lab06` та інтегровано через Pull Request [#49](https://github.com/ViSPry/LAB_KZP/pull/49). Історичний тег `v6.0.0` збережено. Після зауважень викладача створено окрему захищену гілку `main-python`. Розділення Java та Python готується в робочій гілці `fix/separate-python`; після перевірок зміни буде запропоновано через Pull Request до `main-python`.
 
 ### Використання ШІ
 
