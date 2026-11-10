@@ -1,4 +1,5 @@
 """Тести інтерфейсу командного рядка кінотеатру."""
+
 from importlib.metadata import version
 
 import pytest
@@ -86,15 +87,16 @@ def test_cli_empty_selection(tmp_path):
     assert exit_code == 0
     assert "Відібрано сеансів: 0" in output.read_text(encoding="utf-8")
 
+
 def test_cli_version(capsys):
-        """Параметр --version виводить версію без CSV-файлу."""
-        with pytest.raises(SystemExit) as exc_info:
-            main(["--version"])
+    """Параметр --version виводить версію без CSV-файлу."""
+    with pytest.raises(SystemExit) as exc_info:
+        main(["--version"])
 
-        assert exc_info.value.code == 0
+    assert exc_info.value.code == 0
 
-        captured = capsys.readouterr()
-        expected = f"kzp-cinema {version('kzp-lab06-cinema')}"
+    captured = capsys.readouterr()
+    expected = f"kzp-cinema {version('kzp-lab06-cinema')}"
 
-        assert captured.out.strip() == expected
-        assert captured.err == ""
+    assert captured.out.strip() == expected
+    assert captured.err == ""
