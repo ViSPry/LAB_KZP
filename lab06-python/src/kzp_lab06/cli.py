@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+from importlib.metadata import version
 from pathlib import Path
 
 from kzp_lab06.analysis import analyze_screenings
@@ -26,6 +27,12 @@ def non_negative_int(value: str) -> int:
 def main(argv: list[str] | None = None) -> int:
     """Запустити аналіз CSV і повернути код завершення."""
     parser = argparse.ArgumentParser(description="Аналіз продажів квитків кінотеатру")
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"kzp-cinema {version('kzp-lab06-cinema')}",
+    )
 
     parser.add_argument(
         "--input",
