@@ -27,8 +27,8 @@ def test_iter_screenings(tmp_path):
     assert isinstance(first, Screening)
     assert first.film == "Avatar"
     assert second.film == "Dune"
-    assert first.revenue == 15000
-    assert second.revenue == 16000
+    assert first.revenue() == 15000
+    assert second.revenue() == 16000
 
 
 def test_streaming_is_lazy(tmp_path):

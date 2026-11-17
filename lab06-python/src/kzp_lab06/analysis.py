@@ -5,22 +5,22 @@ from dataclasses import dataclass
 from decimal import Decimal
 from itertools import filterfalse
 
-from kzp_lab06.models import Screening
+from kzp_lab06.protocols import ScreeningLike
 
 
 @dataclass(frozen=True)
 class AnalysisResult:
     """Результати аналізу кіносеансів."""
 
-    selected: list[Screening]
+    selected: list[ScreeningLike]
     revenue_by_hall: dict[str, Decimal]
     unique_films: set[str]
     total_revenue: Decimal
-    most_popular: Screening | None
+    most_popular: ScreeningLike | None
 
 
 def analyze_screenings(
-    screenings: Iterable[Screening],
+    screenings: Iterable[ScreeningLike],
     threshold: int = 50,
 ) -> AnalysisResult:
     """Проаналізувати сеанси, де sold > threshold."""
@@ -34,7 +34,7 @@ def analyze_screenings(
 
     for screening in selected:
         revenue_by_hall[screening.hall] = (
-            revenue_by_hall.get(screening.hall, Decimal("0")) + screening.revenue
+            revenue_by_hall.get(screening.hall, Decimal("0")) + screening.revenue()
         )
 
     unique_films = {screening.film for screening in selected}
@@ -71,12 +71,12 @@ class StreamingAnalysisResult:
     revenue_by_hall: dict[str, Decimal]
     unique_films: set[str]
     total_revenue: Decimal
-    most_popular: Screening | None
+    most_popular: ScreeningLike | None
     selected_count: int
 
 
 def analyze_screenings_streaming(
-    screenings: Iterable[Screening],
+    screenings: Iterable[ScreeningLike],
     threshold: int = 50,
 ) -> StreamingAnalysisResult:
     """Обчислити статистику за один прохід без збереження всіх записів."""
@@ -87,7 +87,7 @@ def analyze_screenings_streaming(
     revenue_by_hall: dict[str, Decimal] = {}
     unique_films: set[str] = set()
     total_revenue = Decimal("0")
-    most_popular: Screening | None = None
+    most_popular: ScreeningLike | None = None
     selected_count = 0
 
     # itertools залишає тільки сеанси, де sold > threshold.
@@ -100,7 +100,7 @@ def analyze_screenings_streaming(
         selected_count += 1
         unique_films.add(screening.film)
 
-        revenue = screening.revenue
+        revenue = screening.revenue()
         total_revenue += revenue
 
         revenue_by_hall[screening.hall] = (

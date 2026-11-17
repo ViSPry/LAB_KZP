@@ -7,7 +7,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from kzp_lab06.errors import DataError
-from kzp_lab06.models import Screening
+from kzp_lab06.models import RegularScreening, Screening
 
 COLUMNS = {
     "film": ("film", "фільм"),
@@ -93,7 +93,7 @@ def iter_screenings(path: str | Path) -> Iterator[Screening]:
                         field="sold",
                     ) from error
 
-                yield Screening(
+                yield RegularScreening(
                     film=values["film"],
                     hall=values["hall"],
                     start=start,
