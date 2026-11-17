@@ -154,6 +154,7 @@
 def sold(self) -> int:
     return self._sold
 
+
 @sold.setter
 def sold(self, value: int) -> None:
     if type(value) is not int or value < 0:
