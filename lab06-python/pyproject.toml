@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kzp-lab06-cinema"
-version = "6.0.0.1"
-description = "Laboratory Work 6: Cinema data processing with Python"
+version = "7.0.0.1"
+description = "Laboratory Work 7: Object-oriented cinema data processing with Python"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [

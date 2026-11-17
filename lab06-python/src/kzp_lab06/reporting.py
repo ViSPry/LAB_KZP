@@ -4,6 +4,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from kzp_lab06.analysis import AnalysisResult
+from kzp_lab06.report_context import SafeReportFile
 
 
 def format_money(amount: Decimal) -> str:
@@ -60,7 +61,7 @@ def build_report(result: AnalysisResult) -> str:
                 f"Зал: {screening.hall}",
                 f"Початок: {screening.start:%Y-%m-%dT%H:%M}",
                 f"Продано квитків: {screening.sold}",
-                f"Виручка: {format_money(screening.revenue)} грн",
+                f"Виручка: {format_money(screening.revenue())} грн",
             ]
         )
 
@@ -73,7 +74,6 @@ def save_report(
 ) -> None:
     """Записати звіт у файл UTF-8."""
     destination = Path(path)
-    destination.parent.mkdir(parents=True, exist_ok=True)
 
-    with destination.open("w", encoding="utf-8", newline="\n") as file:
+    with SafeReportFile(destination, "w") as file:
         file.write(build_report(result))

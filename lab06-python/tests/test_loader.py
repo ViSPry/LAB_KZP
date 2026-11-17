@@ -23,7 +23,7 @@ def test_load_valid_csv(tmp_path):
     assert screenings[0].hall == "2"
     assert screenings[0].price == Decimal("150.00")
     assert screenings[0].sold == 100
-    assert screenings[0].revenue == Decimal("15000.00")
+    assert screenings[0].revenue() == Decimal("15000.00")
 
 
 def test_load_java_export(tmp_path):
@@ -39,7 +39,7 @@ def test_load_java_export(tmp_path):
     assert len(screenings) == 1
     assert screenings[0].film == "Dune"
     assert screenings[0].sold == 80
-    assert screenings[0].revenue == Decimal("16000.0")
+    assert screenings[0].revenue() == Decimal("16000.0")
 
 
 def test_empty_csv_with_header(tmp_path):
