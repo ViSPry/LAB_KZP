@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main-python
+      - feature/lab07-oop
     paths:
       - "lab06-python/**"
       - ".github/workflows/lab06-python-ci.yml"
@@ -64,6 +65,11 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
         run: kzp-cinema --help
+
+      - name: Verify installed CLI end-to-end
+        env:
+          PYTHONIOENCODING: utf-8
+        run: kzp-cinema --input data/input.csv --output reports/ci-report.txt
 
       - name: Upload distribution artifacts
         if: matrix.os == 'ubuntu-latest'
